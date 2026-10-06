@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <title>LAN Call</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Join screen -->
+  <section id="join" class="screen active">
+    <div class="card">
+      <img src="/icon.svg" alt="" class="logo">
+      <h1>LAN Call</h1>
+      <p class="muted">Free voice &amp; video calls over Wi-Fi or hotspot — no internet needed.</p>
+      <form id="join-form">
+        <label for="name">Your name</label>
+        <input id="name" maxlength="40" autocomplete="nickname" placeholder="e.g. Ramesh" required>
+        <button type="submit" class="btn primary">Go online</button>
+      </form>
+      <p id="secure-warning" class="warning hidden">
+        This page isn't on HTTPS, so the browser will block your microphone.
+        Open the <strong>https://</strong> address shown by the server.
+      </p>
+    </div>
+  </section>
+
+  <!-- Contacts screen -->
+  <section id="contacts" class="screen">
+    <header class="topbar">
+      <div>
+        <div class="me" id="me-name"></div>
+        <div class="status"><span class="dot" id="conn-dot"></span><span id="conn-text">Connecting…</span></div>
+      </div>
+      <button id="logout" class="btn ghost small">Leave</button>
+    </header>
+    <h2>People on this network</h2>
+    <ul id="peer-list" class="peer-list"></ul>
+    <p id="empty" class="muted center">
+      Nobody else is online yet.<br>
+      Ask others on the same Wi-Fi/hotspot to open this page.
+    </p>
+  </section>
+
+  <!-- Call screen -->
+  <section id="call" class="screen">
+    <video id="remote-video" autoplay playsinline></video>
+    <video id="local-video" autoplay playsinline muted></video>
+    <audio id="remote-audio" autoplay></audio>
+    <div class="call-info">
+      <div class="avatar big" id="call-avatar"></div>
+      <div class="call-name" id="call-name"></div>
+      <div class="call-state" id="call-state"></div>
+    </div>
+    <div class="controls">
+      <button id="btn-mute" class="round" title="Mute" aria-label="Mute">🎤</button>
+      <button id="btn-cam" class="round" title="Camera" aria-label="Camera">📷</button>
+      <button id="btn-flip" class="round" title="Switch camera" aria-label="Switch camera">🔄</button>
+      <button id="btn-hangup" class="round danger" title="Hang up" aria-label="Hang up">📞</button>
+    </div>
+  </section>
+
+  <!-- Incoming call dialog -->
+  <div id="incoming" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="incoming-name">
+    <div class="card ring">
+      <div class="avatar big pulse" id="incoming-avatar"></div>
+      <div class="call-name" id="incoming-name"></div>
+      <div class="muted" id="incoming-kind"></div>
+      <div class="controls">
+        <button id="btn-decline" class="round danger" aria-label="Decline">📞</button>
+        <button id="btn-accept" class="round accept" aria-label="Accept">📞</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
