@@ -11,3 +11,11 @@ To publish it, turn on GitHub Pages for this branch (Settings → Pages → depl
 
 The crop timings follow the North Indian calendar. Edit the `MONTHS` table in the script
 to match your own fields.
+
+## Mind Palace
+
+`mind-palace/index.html` is a separate, self-contained puzzle site: 1000 picture puzzles in
+ten categories (counting, odd one out, sequences, clocks, hidden numbers, mirror images,
+rotations, shape algebra, tangled lines, spot the difference). Every picture is drawn in the
+browser from a fixed seed, so puzzle #n is always the same. Difficulty rises every 100
+puzzles, and progress is saved in the visitor's browser.

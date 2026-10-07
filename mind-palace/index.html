@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mind Palace</title>
+<meta name="description" content="1000 picture puzzles for the observant eye: counting, odd one out, sequences, clocks, hidden numbers, mirrors, rotations, shape algebra, tangled lines and spot the difference.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a detective's desk — the puzzle on the left as the case in hand, the 1000-cell case board on the right. */
+:root {
+  --bg: #e9ecf0;        /* London fog */
+  --surface: #f7f8fa;
+  --paper: #fdfcf8;     /* puzzle plates keep a light ground in both themes */
+  --fg: #1b2230;        /* ink */
+  --muted: #5b6475;
+  --line: #d2d7df;
+  --brass: #a8741f;
+  --oxblood: #8c2f2b;
+  --good: #2e7d4f;
+  --bad: #b3382f;
+  --font-display: "IM Fell English SC", "Georgia", serif;
+  --font-body: "Source Serif 4", "Georgia", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d; --surface: #1a2029; --paper: #ebe8df; --fg: #e6e9ef; --muted: #9aa3b2;
+    --line: #2c3442; --brass: #d7a548; --oxblood: #d06a62; --good: #5fbf84; --bad: #e0675d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161d; --surface: #1a2029; --paper: #ebe8df; --fg: #e6e9ef; --muted: #9aa3b2;
+  --line: #2c3442; --brass: #d7a548; --oxblood: #d06a62; --good: #5fbf84; --bad: #e0675d;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 400 1.02rem/1.55 var(--font-body); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 18px; padding-block: 22px 40px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: end; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+header.top h1 { font: 400 clamp(2.2rem, 5vw, 3.4rem)/1 var(--font-display); margin: 0; letter-spacing: .01em; }
+header.top p { margin: 4px 0 0; color: var(--muted); }
+.score { display: flex; gap: 22px; font-variant-numeric: tabular-nums; }
+.score div { display: grid; }
+.score b { font: 500 1.5rem var(--font-mono); }
+.score span { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+
+.cats { display: flex; flex-wrap: wrap; gap: 6px; padding-block: 16px; }
+.chip { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: .9rem; display: inline-flex; gap: 8px; align-items: center; }
+.chip small { font: 500 .75rem var(--font-mono); color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.chip[aria-pressed="true"] small { color: var(--bg); opacity: .75; }
+
+.desk { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+
+.case { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; }
+.case-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
+.case-no { font: 400 1.6rem var(--font-display); }
+.case-no span { font: 500 1rem var(--font-mono); color: var(--muted); }
+.meta { display: flex; gap: 8px; align-items: center; font-size: .85rem; color: var(--muted); }
+.lvl { display: inline-flex; gap: 2px; }
+.lvl i { width: 6px; height: 12px; background: var(--line); border-radius: 1px; }
+.lvl i.on { background: var(--brass); }
+.plate { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.plate svg { display: block; width: 100%; height: auto; }
+.prompt { font-size: 1.15rem; font-weight: 600; margin: 0; text-wrap: balance; }
+.opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.opt { display: flex; gap: 10px; align-items: center; text-align: left; padding: 10px 12px; border: 1px solid var(--line); background: var(--bg); border-radius: 8px; cursor: pointer; min-height: 54px; }
+.opt:hover:not(:disabled) { border-color: var(--brass); }
+.opt kbd { font: 500 .75rem var(--font-mono); color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+.opt .val { font: 500 1.1rem var(--font-mono); }
+.opt .pic { background: var(--paper); border-radius: 4px; flex: 1; display: flex; justify-content: center; }
+.opt .pic svg { width: 100%; max-width: 120px; height: auto; display: block; }
+.opt.right { border-color: var(--good); box-shadow: inset 0 0 0 2px var(--good); }
+.opt.wrong { border-color: var(--bad); box-shadow: inset 0 0 0 2px var(--bad); }
+.opt:disabled { cursor: default; }
+.verdict { border-left: 4px solid var(--brass); padding: 6px 12px; display: grid; gap: 2px; }
+.verdict b { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; }
+.verdict.good { border-color: var(--good); } .verdict.good b { color: var(--good); }
+.verdict.bad { border-color: var(--bad); } .verdict.bad b { color: var(--bad); }
+.nav { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { border: 1px solid var(--line); background: transparent; border-radius: 6px; padding: 7px 14px; cursor: pointer; }
+.btn.primary { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.btn:hover { border-color: var(--brass); }
+.jump { display: inline-flex; gap: 6px; align-items: center; margin-left: auto; font-size: .9rem; color: var(--muted); }
+.jump input { width: 6.8em; font: 500 .95rem var(--font-mono); padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); }
+
+aside { display: grid; gap: 22px; }
+aside h2 { font: 400 1.45rem var(--font-display); margin: 0 0 8px; }
+.record { display: grid; gap: 6px; }
+.rec { display: grid; grid-template-columns: 9.5em minmax(0, 1fr) 4.2em; gap: 10px; align-items: center; font-size: .88rem; }
+.rec .bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.rec .bar i { display: block; height: 100%; background: var(--brass); }
+.rec span:last-child { font: 500 .8rem var(--font-mono); text-align: right; color: var(--muted); }
+.board { display: grid; grid-template-columns: repeat(40, minmax(0, 1fr)); gap: 2px; }
+.tile { aspect-ratio: 1; max-width: 100%; border: 0; padding: 0; border-radius: 2px; background: var(--line); cursor: pointer; }
+.tile.ok { background: var(--good); }
+.tile.no { background: var(--bad); }
+.tile.cur { outline: 2px solid var(--brass); outline-offset: 1px; }
+.tile.dim { opacity: .25; }
+.board-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .82rem; color: var(--muted); margin-top: 8px; }
+.board-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+footer { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 10px 24px; justify-content: space-between; align-items: center; color: var(--muted); font-size: .88rem; }
+
+@media (max-width: 900px) {
+  .desk { grid-template-columns: minmax(0, 1fr); }
+  .board { grid-template-columns: repeat(25, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .opts { grid-template-columns: minmax(0, 1fr); }
+  .rec { grid-template-columns: 7.5em minmax(0, 1fr) 3.8em; }
+  .jump { margin-left: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .verdict { animation: in .25s ease both; }
+  @keyframes in { from { transform: translateY(4px); } to { transform: none; } }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Mind Palace</h1>
+      <p>1000 picture puzzles. You see, but do you observe?</p>
+    </div>
+    <div class="score" aria-live="polite">
+      <div><b id="s-done">0</b><span>Solved</span></div>
+      <div><b id="s-acc">–</b><span>Accuracy</span></div>
+      <div><b id="s-streak">0</b><span>Streak</span></div>
+    </div>
+  </header>
+
+  <nav class="cats" id="cats" aria-label="Puzzle categories"></nav>
+
+  <div class="desk">
+    <section class="case" aria-labelledby="case-no">
+      <div class="case-head">
+        <div class="case-no" id="case-no">Puzzle <span>#1</span></div>
+        <div class="meta"><span id="case-cat"></span><span class="lvl" id="case-lvl" aria-label="Difficulty"></span></div>
+      </div>
+      <div class="plate" id="plate"></div>
+      <p class="prompt" id="prompt"></p>
+      <div class="opts" id="opts"></div>
+      <div id="verdict" hidden></div>
+      <div class="nav">
+        <button class="btn" id="prev" type="button">← Previous</button>
+        <button class="btn primary" id="next" type="button">Next →</button>
+        <button class="btn" id="unsolved" type="button">Next unsolved</button>
+        <label class="jump" for="jump">Go to
+          <input id="jump" type="number" min="1" max="1000" inputmode="numeric" placeholder="1–1000">
+        </label>
+      </div>
+    </section>
+
+    <aside>
+      <section aria-labelledby="rec-h">
+        <h2 id="rec-h">Your record</h2>
+        <div class="record" id="record"></div>
+      </section>
+      <section aria-labelledby="board-h">
+        <h2 id="board-h">The case board</h2>
+        <div class="board" id="board"></div>
+        <div class="board-legend">
+          <span><i style="background:var(--line)"></i>Open</span>
+          <span><i style="background:var(--good)"></i>Solved</span>
+          <span><i style="background:var(--bad)"></i>Missed</span>
+          <span>Difficulty rises every 100 puzzles</span>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <footer>
+    <span>Keys: 1–4 to answer · ← → to move · progress stays in this browser</span>
+    <button class="btn" id="reset" type="button">Reset progress</button>
+  </footer>
+</div>
+
+<script>
+/* ---------- seeded randomness ---------- */
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function R(seed) {
+  const f = mulberry32(seed);
+  return {
+    f, int: (a, b) => a + Math.floor(f() * (b - a + 1)),
+    pick: a => a[Math.floor(f() * a.length)],
+    shuffle: arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(f() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  };
+}
+
+/* ---------- drawing helpers ---------- */
+const COL = { red: "#d64541", blue: "#2f6fd6", green: "#2e9e5b", yellow: "#e6b01e", purple: "#8e44ad", orange: "#e67e22" };
+const INK = "#2a2f3a";
+const SERIF = "'Source Serif 4', Georgia, serif";
+const MONO = "'JetBrains Mono', ui-monospace, monospace";
+const svg = (w, h, body) => `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img">${body}</svg>`;
+function starPts(x, y, s) {
+  let p = [];
+  for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? s * .45 : s * 1.15; p.push((x + r * Math.cos(a)).toFixed(1) + "," + (y + r * Math.sin(a)).toFixed(1)); }
+  return p.join(" ");
+}
+function shape(t, x, y, s, fill, outline) {
+  const paint = outline ? `fill="none" stroke="${fill}" stroke-width="2.5"` : `fill="${fill}"`;
+  switch (t) {
+    case "circle": return `<circle cx="${x}" cy="${y}" r="${s}" ${paint}/>`;
+    case "square": return `<rect x="${x - s * .9}" y="${y - s * .9}" width="${s * 1.8}" height="${s * 1.8}" ${paint}/>`;
+    case "triangle": return `<polygon points="${x},${y - s * 1.1} ${x + s * 1.1},${y + s * .85} ${x - s * 1.1},${y + s * .85}" ${paint}/>`;
+    case "diamond": return `<polygon points="${x},${y - s * 1.2} ${x + s},${y} ${x},${y + s * 1.2} ${x - s},${y}" ${paint}/>`;
+    case "star": return `<polygon points="${starPts(x, y, s)}" ${paint}/>`;
+  }
+}
+const ring = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#a8741f" stroke-width="3" stroke-dasharray="5 3"/>`;
+function scatter(r, n, minS, maxS, box, gap) {
+  const items = [];
+  for (let tries = 0; items.length < n && tries < 4000; tries++) {
+    const s = r.int(minS, maxS), x = r.int(box[0] + s + 4, box[2] - s - 4), y = r.int(box[1] + s + 4, box[3] - s - 4);
+    if (items.every(o => (o.x - x) ** 2 + (o.y - y) ** 2 > (o.s + s + gap) ** 2)) items.push({ x, y, s });
+  }
+  return items;
+}
+function uniqueOptions(correct, candidates, key = v => String(v), max = 4) {
+  const seen = new Set([key(correct)]), out = [correct];
+  for (const c of candidates) { if (out.length >= max) break; const k = key(c); if (!seen.has(k)) { seen.add(k); out.push(c); } }
+  return out;
+}
+const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
+
+/* ---------- 1. Counting ---------- */
+function genCount(r, l) {
+  const types = ["circle", "square", "triangle", ...(l >= 4 ? ["diamond"] : []), ...(l >= 8 ? ["star"] : [])];
+  const cols = Object.keys(COL).slice(0, Math.min(6, 2 + Math.ceil(l / 2)));
+  const target = { t: r.pick(types), c: r.pick(cols) };
+  const pts = scatter(r, 8 + l * 4, l > 6 ? 7 : 9, l > 6 ? 11 : 14, [0, 0, 400, 260], 3);
+  const forced = r.int(2, 3 + Math.floor(l / 2));
+  const outlineOn = l >= 7;
+  const items = pts.map((p, i) => i < forced ? { ...p, ...target, o: false }
+    : { ...p, t: r.pick(types), c: r.pick(cols), o: outlineOn && r.f() < .3 });
+  const hits = items.filter(o => o.t === target.t && o.c === target.c && !o.o);
+  const order = r.shuffle(items.map((_, i) => i));
+  const draw = reveal => svg(400, 260, order.map(i => { const o = items[i]; return shape(o.t, o.x, o.y, o.s, COL[o.c], o.o); }).join("")
+    + (reveal ? hits.map(o => ring(o.x, o.y, o.s + 7)).join("") : ""));
+  const k = hits.length;
+  return {
+    prompt: `How many ${outlineOn ? "filled " : ""}${target.c} ${target.t}s are there?`,
+    draw, options: uniqueOptions(k, r.shuffle([k + 1, k - 1, k + 2, k - 2, k + 3]).filter(v => v >= 0)),
+    explain: `There ${k === 1 ? "is" : "are"} ${k}. ${outlineOn ? "Outlined shapes don't count. " : ""}${types.includes("diamond") && (target.t === "square" || target.t === "diamond") ? "Squares and diamonds are easy to mix up." : "Count in one sweep, left to right."}`
+  };
+}
+
+/* ---------- 2. Odd one out ---------- */
+const PAIRS = [
+  [["O", "Q"], ["E", "F"], ["M", "W"], ["T", "Y"], ["P", "R"], ["K", "X"]],
+  [["b", "d"], ["p", "q"], ["6", "9"], ["C", "G"], ["8", "B"], ["V", "Y"], ["N", "M"]],
+  [["0", "O"], ["I", "l"], ["5", "S"], ["n", "h"], ["rn", "m"], ["1", "l"], ["vv", "w"], ["cl", "d"]]
+];
+function genOdd(r, l) {
+  const tier = l <= 3 ? 0 : l <= 6 ? 1 : 2;
+  const pair = r.shuffle(r.pick(PAIRS[tier]));
+  const rows = Math.min(3 + Math.floor(l / 2), 7), cols = Math.min(4 + Math.floor(l / 2), 9);
+  const tr = r.int(0, rows - 1), tc = r.int(0, cols - 1);
+  const cw = 360 / cols, ch = 230 / rows, fs = Math.min(cw, ch) * .62;
+  const name = (rr, cc) => String.fromCharCode(65 + rr) + (cc + 1);
+  const draw = reveal => {
+    let b = "";
+    for (let c = 0; c < cols; c++) b += `<text x="${32 + cw * c + cw / 2}" y="18" font-family="${MONO}" font-size="12" fill="#7a8291" text-anchor="middle">${c + 1}</text>`;
+    for (let rr = 0; rr < rows; rr++) {
+      b += `<text x="14" y="${28 + ch * rr + ch / 2 + 4}" font-family="${MONO}" font-size="12" fill="#7a8291" text-anchor="middle">${String.fromCharCode(65 + rr)}</text>`;
+      for (let c = 0; c < cols; c++) {
+        const odd = rr === tr && c === tc;
+        b += `<text x="${32 + cw * c + cw / 2}" y="${28 + ch * rr + ch / 2 + fs * .35}" font-family="${SERIF}" font-size="${fs.toFixed(1)}" fill="${INK}" text-anchor="middle">${odd ? pair[1] : pair[0]}</text>`;
+      }
+    }
+    if (reveal) b += `<rect x="${32 + cw * tc + 2}" y="${28 + ch * tr + 2}" width="${cw - 4}" height="${ch - 4}" rx="6" fill="none" stroke="#a8741f" stroke-width="3"/>`;
+    return svg(400, 262, b);
+  };
+  const others = [];
+  for (let i = 0; i < 12; i++) others.push(name(r.int(0, rows - 1), r.int(0, cols - 1)));
+  return {
+    prompt: "One character is different from all the others. Where is it?",
+    draw, options: uniqueOptions(name(tr, tc), others),
+    explain: `${name(tr, tc)} shows “${pair[1]}”; every other cell shows “${pair[0]}”.`
+  };
+}
+
+/* ---------- 3. Sequences ---------- */
+function arrow(cx, cy, sc, rot, fill) {
+  return `<g transform="translate(${cx} ${cy}) rotate(${rot}) scale(${sc})"><path d="M0 -22 L15 -4 L5 -4 L5 20 L-5 20 L-5 -4 L-15 -4 Z" fill="${fill}"/></g>`;
+}
+function genSeq(r, l) {
+  const step = r.pick(l <= 3 ? [90, -90, 45, -45] : [45, -45, 90, 135, -135, 30, -30]);
+  const start = r.pick([0, 45, 90, 180, 270]);
+  const palette = r.shuffle(Object.values(COL));
+  const colors = l >= 4 ? palette.slice(0, r.int(2, 3)) : [INK];
+  const sizes = l >= 7 ? r.pick([[.8, 1.2], [1.2, .8, .8], [.7, 1, 1.3]]) : [1];
+  const corners = [[-26, -26], [26, -26], [26, 26], [-26, 26]];
+  const dotStep = l >= 9 ? r.pick([1, -1, 2]) : 0;
+  const term = i => ({ rot: ((start + step * i) % 360 + 360) % 360, c: colors[i % colors.length], s: sizes[i % sizes.length], d: dotStep ? ((i * dotStep) % 4 + 4) % 4 : -1 });
+  const glyph = (t, x, y) => arrow(x, y, t.s, t.rot, t.c) + (t.d >= 0 ? `<circle cx="${x + corners[t.d][0]}" cy="${y + corners[t.d][1]}" r="5" fill="${INK}"/>` : "");
+  const draw = () => {
+    let b = "";
+    for (let i = 0; i < 4; i++) b += `<rect x="${12 + i * 76}" y="92" width="68" height="76" rx="6" fill="none" stroke="#d2d7df"/>` + glyph(term(i), 46 + i * 76, 130);
+    b += `<rect x="316" y="92" width="72" height="76" rx="6" fill="none" stroke="#a8741f" stroke-dasharray="5 4"/><text x="352" y="143" font-family="${SERIF}" font-size="38" fill="#a8741f" text-anchor="middle">?</text>`;
+    return svg(400, 260, b);
+  };
+  const ans = term(4);
+  const k = t => [t.rot, t.c, t.s, t.d].join("|");
+  const variants = [
+    { ...ans, rot: (ans.rot + step + 360) % 360 }, { ...ans, rot: (ans.rot - step + 360) % 360 }, { ...ans, rot: (ans.rot + 180) % 360 },
+    ...(colors.length > 1 ? [{ ...ans, c: colors[(5) % colors.length] }, { ...ans, c: colors[3 % colors.length] }] : []),
+    ...(sizes.length > 1 ? [{ ...ans, s: sizes[5 % sizes.length] }] : []),
+    ...(dotStep ? [{ ...ans, d: (ans.d + 1) % 4 }, { ...ans, d: (ans.d + 2) % 4 }] : [])
+  ];
+  const opts = uniqueOptions(ans, r.shuffle(variants), k);
+  const parts = [`each step turns ${Math.abs(step)}° ${step > 0 ? "clockwise" : "anticlockwise"}`];
+  if (colors.length > 1) parts.push(`colours repeat every ${colors.length}`);
+  if (sizes.length > 1) parts.push(`sizes repeat every ${sizes.length}`);
+  if (dotStep) parts.push(`the dot moves ${Math.abs(dotStep)} corner${Math.abs(dotStep) > 1 ? "s" : ""} ${dotStep > 0 ? "clockwise" : "anticlockwise"}`);
+  return {
+    prompt: "Which picture comes next?", draw,
+    options: opts.map(t => ({ pic: svg(90, 90, glyph(t, 45, 45)), key: k(t) })),
+    explain: parts.join("; ").replace(/^./, c => c.toUpperCase()) + "."
+  };
+}
+
+/* ---------- 4. Clocks ---------- */
+const fmt = (h, m) => `${h}:${String(m).padStart(2, "0")}`;
+function genClock(r, l) {
+  const h = r.int(1, 12), m = l <= 2 ? r.pick([0, 15, 30, 45]) : l <= 5 ? r.int(0, 11) * 5 : r.int(0, 59);
+  const mirror = l >= 8;
+  const numbers = l < 6;
+  const ha = ((h % 12) + m / 60) * 30, ma = m * 6;
+  const sh = mirror ? 360 - ha : ha, sm = mirror ? (360 - ma) % 360 : ma;
+  const draw = () => {
+    let b = `<circle cx="200" cy="130" r="112" fill="#fff" stroke="${INK}" stroke-width="5"/>`;
+    for (let i = 0; i < 60; i++) {
+      const a = i * 6 * Math.PI / 180, big = i % 5 === 0, r1 = i === 0 ? 84 : big ? 92 : 100;
+      b += `<line x1="${200 + r1 * Math.sin(a)}" y1="${130 - r1 * Math.cos(a)}" x2="${200 + 106 * Math.sin(a)}" y2="${130 - 106 * Math.cos(a)}" stroke="${INK}" stroke-width="${i === 0 ? 6 : big ? 3 : 1}"/>`;
+    }
+    if (numbers) for (let i = 1; i <= 12; i++) { const a = i * 30 * Math.PI / 180; b += `<text x="${200 + 74 * Math.sin(a)}" y="${130 - 74 * Math.cos(a) + 7}" font-family="${SERIF}" font-size="20" fill="${INK}" text-anchor="middle">${i}</text>`; }
+    const hand = (ang, len, w, c) => { const a = ang * Math.PI / 180; return `<line x1="200" y1="130" x2="${200 + len * Math.sin(a)}" y2="${130 - len * Math.cos(a)}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`; };
+    b += hand(sh, 56, 9, INK) + hand(sm, 90, 5, "#8c2f2b") + `<circle cx="200" cy="130" r="7" fill="${INK}"/>`;
+    if (mirror) b += `<text x="200" y="252" font-family="${SERIF}" font-size="14" fill="#7a8291" text-anchor="middle">seen in a mirror</text>`;
+    return svg(400, 260, b);
+  };
+  const wrap = (hh, mm) => { mm = ((mm % 60) + 60) % 60; hh = ((hh - 1) % 12 + 12) % 12 + 1; return fmt(hh, mm); };
+  const swapH = Math.floor(m / 5) || 12, swapM = Math.round(ha / 6) % 60;
+  const naiveM = (60 - m) % 60, naiveH = Math.floor(((360 - ha) % 360) / 30) || 12;
+  const fine = l >= 6 ? 1 : 5;
+  const cands = [fmt(swapH, swapM), wrap(h + 1, m), wrap(h - 1, m), wrap(h, m + fine), wrap(h, m - fine), wrap(h, m + 30)];
+  if (mirror) cands.unshift(fmt(naiveH, naiveM));
+  return {
+    prompt: mirror ? "This clock is reflected in a mirror. What time is it really?" : "What time does the clock show?",
+    draw, options: uniqueOptions(fmt(h, m), r.shuffle(cands.slice(0, 3)).concat(cands.slice(3))),
+    explain: mirror ? `In the mirror it reads ${fmt(naiveH, naiveM)}. Flip it back: the real time is ${fmt(h, m)}.`
+      : `The short hand is past ${h}, the long hand points to ${m} minutes: ${fmt(h, m)}.`
+  };
+}
+
+/* ---------- 5. Hidden numbers ---------- */
+const PLATE = [
+  { in: ["#e0703a", "#d9572b", "#ef8a4c", "#e86a3e"], out: ["#6aa84f", "#7cb85d", "#5c9a45", "#8cc270"] },
+  { in: ["#c97a4a", "#d08852", "#bd6d40", "#d79562"], out: ["#9aa654", "#a8b062", "#8e9a4a", "#b0b46e"] },
+  { in: ["#bf8656", "#c99263", "#b37b4d", "#cf9a6c"], out: ["#a19b5c", "#ab9f66", "#989254", "#b1a670"] }
+];
+let maskCanvas = null;
+function textMask(label) {
+  maskCanvas = maskCanvas || document.createElement("canvas");
+  maskCanvas.width = 260; maskCanvas.height = 260;
+  const g = maskCanvas.getContext("2d", { willReadFrequently: true });
+  g.clearRect(0, 0, 260, 260); g.fillStyle = "#000";
+  g.font = `900 ${label.length === 1 ? 200 : 150}px "Arial Black", "Helvetica Neue", Arial, sans-serif`;
+  g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(label, 130, 140);
+  const d = g.getImageData(0, 0, 260, 260).data;
+  return (x, y) => { x = Math.round(x); y = Math.round(y); return x >= 0 && y >= 0 && x < 260 && y < 260 && d[(y * 260 + x) * 4 + 3] > 120; };
+}
+const CONFUSE = { 0: 8, 1: 7, 2: 7, 3: 8, 4: 9, 5: 6, 6: 5, 7: 1, 8: 3, 9: 4 };
+function genPlate(r, l) {
+  const n = l <= 3 ? r.int(2, 9) : r.int(10, 99);
+  const pal = PLATE[l <= 3 ? 0 : l <= 6 ? 1 : 2];
+  const dots = [];
+  for (let y = 9; y < 253; y += 8.2) for (let x = 79 + (Math.round(y / 8.2) % 2) * 4.3; x < 322; x += 8.6) {
+    const jx = x + (r.f() - .5) * 3, jy = y + (r.f() - .5) * 3, rad = r.pick([2.2, 2.7, 3.2, 3.6, 4]);
+    if ((jx - 200) ** 2 + (jy - 130) ** 2 < (120 - rad) ** 2) dots.push([jx, jy, rad, r.int(0, 3)]);
+  }
+  const label = String(n);
+  const draw = () => {
+    const inside = textMask(label);
+    return svg(400, 260, `<circle cx="200" cy="130" r="124" fill="#f4efe4"/>` + dots.map(([x, y, rad, ci]) =>
+      `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rad}" fill="${(inside(x - 70, y) ? pal.in : pal.out)[ci]}"/>`).join(""));
+  };
+  const s = label.split("");
+  const cands = [];
+  s.forEach((ch, i) => { const t = s.slice(); t[i] = CONFUSE[ch]; cands.push(+t.join("")); });
+  if (s.length === 2) cands.push(+(s[1] + s[0]), n + 10, n - 10, +s[0], +s[1]); else cands.push(n + 1, n - 1, n + 10);
+  return {
+    prompt: "What number is hidden in the dots?", draw,
+    options: uniqueOptions(n, r.shuffle(cands).filter(v => v > 0 && v < 100 && !(s.length === 2 && v < 10 && l > 6))),
+    explain: `The number is ${n}. Unfocus your eyes slightly and look for the warmer dots.`
+  };
+}
+
+/* ---------- 6 & 7. Mirrors and rotations ---------- */
+const norm = cells => { const mx = Math.min(...cells.map(c => c[0])), my = Math.min(...cells.map(c => c[1])); return cells.map(([x, y]) => [x - mx, y - my]).sort((a, b) => a[0] - b[0] || a[1] - b[1]); };
+const ck = cells => norm(cells).map(c => c.join(",")).join(";");
+const rot90 = cells => norm(cells.map(([x, y]) => [-y, x]));
+const flipH = cells => norm(cells.map(([x, y]) => [-x, y]));
+const flipV = cells => norm(cells.map(([x, y]) => [x, -y]));
+function polyo(r, n) {
+  for (let attempt = 0; attempt < 400; attempt++) {
+    const cells = [[0, 0]], set = new Set(["0,0"]);
+    while (cells.length < n) {
+      const [x, y] = r.pick(cells), [dx, dy] = r.pick([[1, 0], [-1, 0], [0, 1], [0, -1]]);
+      const k = (x + dx) + "," + (y + dy);
+      if (!set.has(k)) { set.add(k); cells.push([x + dx, y + dy]); }
+    }
+    const c = norm(cells), rots = [c, rot90(c), rot90(rot90(c)), rot90(rot90(rot90(c)))];
+    const keys = new Set(rots.map(ck));
+    if (keys.size === 4 && !keys.has(ck(flipH(c)))) return rots;
+  }
+  return null;
+}
+function drawPoly(cells, W, H, color, mark) {
+  const w = Math.max(...cells.map(c => c[0])) + 1, h = Math.max(...cells.map(c => c[1])) + 1;
+  const s = Math.min((W - 16) / w, (H - 16) / h, W > 200 ? 36 : 18);
+  const ox = (W - w * s) / 2, oy = (H - h * s) / 2;
+  return cells.map(([x, y]) => `<rect x="${(ox + x * s).toFixed(1)}" y="${(oy + y * s).toFixed(1)}" width="${s.toFixed(1)}" height="${s.toFixed(1)}" fill="${color}" stroke="#fdfcf8" stroke-width="2"/>`).join("")
+    + (mark ? `<rect x="${ox - 4}" y="${oy - 4}" width="${w * s + 8}" height="${h * s + 8}" fill="none" stroke="#7a8291" stroke-dasharray="4 4"/>` : "");
+}
+function genMirror(r, l) {
+  const rots = polyo(r, 4 + Math.ceil(l / 2)) || polyo(r, 5);
+  const orig = rots[0];
+  const ans = flipH(orig);
+  const cands = l >= 6 ? [flipV(orig), rots[1], rots[3], rots[2]] : [rots[1], rots[2], rots[3]];
+  const color = r.pick(["#2f6fd6", "#8c2f2b", "#2e9e5b", "#8e44ad"]);
+  const opts = uniqueOptions(ans, r.shuffle(cands), ck);
+  return {
+    prompt: "Which option is this shape flipped left to right, as in a mirror?",
+    draw: () => svg(400, 260, `<line x1="330" y1="20" x2="330" y2="240" stroke="#7a8291" stroke-width="3"/><text x="338" y="250" font-family="${SERIF}" font-size="13" fill="#7a8291">mirror</text>` + `<g transform="translate(40 0)">${drawPoly(orig, 260, 260, color)}</g>`),
+    options: opts.map(c => ({ pic: svg(100, 100, drawPoly(c, 100, 100, color)), key: ck(c) })),
+    explain: l >= 6 ? "A left–right mirror keeps the top at the top. Upside-down flips and turns are traps." : "A mirror swaps left and right. Turning the shape never gives you its mirror image."
+  };
+}
+function genRotate(r, l) {
+  const rots = polyo(r, 4 + Math.ceil(l / 2)) || polyo(r, 5);
+  const orig = rots[0], turn = r.int(1, 3);
+  const ans = rots[turn];
+  const m = flipH(orig), mrots = [m, rot90(m), rot90(rot90(m)), rot90(rot90(rot90(m)))];
+  const color = r.pick(["#e67e22", "#2f6fd6", "#2e9e5b", "#8c2f2b"]);
+  const opts = uniqueOptions(ans, r.shuffle(mrots), ck);
+  return {
+    prompt: "Which option is the same shape, only turned (not flipped)?",
+    draw: () => svg(400, 260, drawPoly(orig, 400, 260, color)),
+    options: opts.map(c => ({ pic: svg(100, 100, drawPoly(c, 100, 100, color)), key: ck(c) })),
+    explain: `The answer is the shape turned ${turn * 90}° clockwise. The other three are mirror images, and no amount of turning will line them up.`
+  };
+}
+
+/* ---------- 8. Shape algebra ---------- */
+const SYM = [{ t: "triangle", c: "#d64541" }, { t: "circle", c: "#2f6fd6" }, { t: "square", c: "#2e9e5b" }, { t: "star", c: "#e6a317" }];
+function evalTokens(vals, ops, precedence) {
+  if (!precedence) return ops.reduce((acc, op, i) => op === "+" ? acc + vals[i + 1] : op === "−" ? acc - vals[i + 1] : acc * vals[i + 1], vals[0]);
+  const v = [vals[0]], o = [];
+  ops.forEach((op, i) => { if (op === "×") v[v.length - 1] *= vals[i + 1]; else { o.push(op); v.push(vals[i + 1]); } });
+  return o.reduce((acc, op, i) => op === "+" ? acc + v[i + 1] : acc - v[i + 1], v[0]);
+}
+function genAlgebra(r, l) {
+  const sy = r.shuffle(SYM);
+  let val, lines, q;
+  if (l <= 3) {
+    val = [r.int(2, 9), r.int(1, 9)];
+    lines = [[[0, 0, 0], ["+", "+"]], [[0, 1], ["+"]]];
+    q = [[1, 1, 0], ["+", "+"]];
+  } else if (l <= 6) {
+    val = [r.int(2, 6), r.int(2, 6), r.int(1, 9)];
+    lines = [[[0, 0, 0], ["+", "+"]], [[0, 1], ["+"]], [[1, 2], ["+"]]];
+    q = [[2, 1, 0], ["+", "×"]];
+  } else {
+    const c = r.int(1, 6);
+    val = [r.int(2, 5), r.int(2, 5), c, c + r.int(1, 6)];
+    lines = [[[0, 0, 0], ["+", "+"]], [[0, 1], ["×"]], [[1, 2, 2], ["+", "+"]], [[3, 2], ["−"]]];
+    q = [[3, 2, 1, 0], ["+", "×", "−"]];
+  }
+  const row = (y, ids, ops, rhs) => {
+    let x = 50, b = "";
+    ids.forEach((id, i) => {
+      b += shape(sy[id].t, x, y, 15, sy[id].c); x += 34;
+      if (i < ops.length) { b += `<text x="${x}" y="${y + 8}" font-family="${MONO}" font-size="24" fill="${INK}" text-anchor="middle">${ops[i]}</text>`; x += 34; }
+    });
+    return b + `<text x="${x + 6}" y="${y + 8}" font-family="${MONO}" font-size="24" fill="${INK}">= ${rhs}</text>`;
+  };
+  const total = lines.length + 1, gap = 236 / total;
+  const ans = evalTokens(q[0].map(i => val[i]), q[1], true);
+  const draw = () => svg(400, 260, lines.map((ln, i) => row(30 + gap * i, ln[0], ln[1], evalTokens(ln[0].map(j => val[j]), ln[1], true))).join("")
+    + `<line x1="30" y1="${30 + gap * lines.length - gap / 2}" x2="370" y2="${30 + gap * lines.length - gap / 2}" stroke="#d2d7df"/>`
+    + row(30 + gap * lines.length, q[0], q[1], "?"));
+  const ltr = evalTokens(q[0].map(i => val[i]), q[1], false);
+  const names = val.map((v, i) => `${sy[i].t} = ${v}`).join(", ");
+  return {
+    prompt: "Each shape stands for a number. What is the value of the last line?", draw,
+    options: uniqueOptions(ans, r.shuffle([ltr, ans + 1, ans - 1, ans + 2, ans - 2, ans + val[0]]).sort((a, b) => (b === ltr) - (a === ltr))),
+    explain: `${names}. ${q[1].includes("×") ? `Multiply before adding: the answer is ${ans}${ltr !== ans ? `, not ${ltr}` : ""}.` : `So the last line is ${ans}.`}`
+  };
+}
+
+/* ---------- 9. Tangled lines ---------- */
+function genPaths(r, l) {
+  const n = Math.min(3 + Math.floor(l / 2), 7);
+  const xs = Array.from({ length: n }, (_, i) => 40 + i * (320 / (n - 1)));
+  const perm = r.shuffle(xs.map((_, i) => i));
+  const target = r.int(0, n - 1);
+  const owner = perm.indexOf(target);
+  const lineCols = r.shuffle(Object.values(COL));
+  const paths = xs.map((x, i) => {
+    const bx = xs[perm[i]];
+    if (l <= 4) return `M${x} 40 C${r.int(40, 360)} ${r.int(70, 120)}, ${r.int(40, 360)} ${r.int(140, 190)}, ${bx} 222`;
+    const mx = r.int(60, 340);
+    const c2 = r.int(Math.max(40, mx - 90), Math.min(360, mx + 90));
+    return `M${x} 40 C${r.int(40, 360)} ${r.int(55, 90)}, ${c2} ${r.int(100, 125)}, ${mx} 131 S${r.int(40, 360)} ${r.int(180, 205)}, ${bx} 222`;
+  });
+  const colored = l <= 2;
+  const draw = reveal => {
+    let b = paths.map((d, i) => `<path d="${d}" fill="none" stroke="${colored ? lineCols[i % lineCols.length] : INK}" stroke-width="${colored ? 4 : 2.6}" stroke-linecap="round" opacity="${reveal ? .35 : 1}"/>`).join("");
+    if (reveal) b += `<path d="${paths[owner]}" fill="none" stroke="#a8741f" stroke-width="6" stroke-linecap="round"/>`;
+    xs.forEach((x, i) => { b += `<circle cx="${x}" cy="40" r="13" fill="#fdfcf8" stroke="${INK}" stroke-width="2"/><text x="${x}" y="45" font-family="${MONO}" font-size="14" fill="${INK}" text-anchor="middle">${String.fromCharCode(65 + i)}</text>`; });
+    xs.forEach((x, j) => { b += j === target ? shape("star", x, 232, 13, "#e6a317") : `<circle cx="${x}" cy="226" r="5" fill="${INK}"/>`; });
+    return svg(400, 260, b);
+  };
+  const letters = xs.map((_, i) => String.fromCharCode(65 + i));
+  return {
+    prompt: "Which letter's line ends at the star?", draw,
+    options: uniqueOptions(letters[owner], r.shuffle(letters)),
+    explain: `Line ${letters[owner]} reaches the star. Trace from the star upward; it's quicker than starting at each letter.`
+  };
+}
+
+/* ---------- 10. Spot the difference ---------- */
+function genDiff(r, l) {
+  const types = ["circle", "square", "triangle", "diamond", "star"];
+  const cols = Object.keys(COL);
+  const base = scatter(r, 8 + l, 8, 15, [0, 0, 182, 236], 6).map(p => ({ ...p, t: r.pick(types), c: r.pick(cols) }));
+  const k = r.int(1, Math.min(5, 1 + Math.ceil(l / 2)));
+  const chosen = r.shuffle(base.map((_, i) => i)).slice(0, k);
+  const right = base.map(o => ({ ...o }));
+  const notes = [], spots = [];
+  chosen.forEach(i => {
+    const o = right[i], kind = r.pick(["remove", "colour", "move", "size", "shape"]);
+    spots.push([base[i].x, base[i].y, base[i].s]);
+    if (kind === "remove") { o.gone = true; notes.push("a shape is missing"); }
+    else if (kind === "colour") { o.c = r.pick(cols.filter(c => c !== o.c)); notes.push("a colour changed"); }
+    else if (kind === "move") { const d = l >= 7 ? 13 : 22; o.x = Math.max(o.s + 3, Math.min(182 - o.s - 3, o.x + r.pick([-d, d]))); o.y = Math.max(o.s + 3, Math.min(236 - o.s - 3, o.y + r.pick([-d, d, 0]))); notes.push("a shape moved"); }
+    else if (kind === "size") { o.s = Math.round(o.s * (o.s > 11 ? .62 : 1.5)); notes.push("a shape changed size"); }
+    else { o.t = r.pick(types.filter(t => t !== o.t)); notes.push("a shape changed form"); }
+  });
+  const panel = (items, ox) => `<rect x="${ox}" y="12" width="182" height="236" rx="6" fill="#fff" stroke="#d2d7df"/>`
+    + items.filter(o => !o.gone).map(o => shape(o.t, ox + o.x, 12 + o.y, o.s, COL[o.c])).join("");
+  const draw = reveal => svg(400, 260, panel(base, 12) + panel(right, 206) + (reveal ? spots.map(([x, y, s]) => ring(206 + x, 12 + y, s + 14)).join("") : ""));
+  return {
+    prompt: "How many differences are there between the two pictures?", draw,
+    options: uniqueOptions(k, r.shuffle([k + 1, k - 1, k + 2, k + 3]).filter(v => v >= 1)),
+    explain: `${k} difference${k > 1 ? "s" : ""}: ${notes.join(", ")}.`
+  };
+}
+
+/* ---------- catalogue ---------- */
+const TYPES = [
+  { id: "count", name: "Counting", gen: genCount },
+  { id: "odd", name: "Odd one out", gen: genOdd },
+  { id: "seq", name: "Sequences", gen: genSeq },
+  { id: "clock", name: "Clocks", gen: genClock },
+  { id: "plate", name: "Hidden numbers", gen: genPlate },
+  { id: "mirror", name: "Mirror images", gen: genMirror },
+  { id: "rotate", name: "Rotations", gen: genRotate },
+  { id: "algebra", name: "Shape algebra", gen: genAlgebra },
+  { id: "paths", name: "Tangled lines", gen: genPaths },
+  { id: "diff", name: "Spot the difference", gen: genDiff }
+];
+const TOTAL = 1000;
+const typeOf = n => TYPES[n % TYPES.length];
+const levelOf = n => Math.floor(n / 100) + 1;
+function build(n) {
+  const r = R(n * 7919 + 101);
+  const q = typeOf(n).gen(r, levelOf(n));
+  const order = r.shuffle(q.options.map((_, i) => i));
+  return { ...q, options: order.map(i => q.options[i]), correct: order.indexOf(0) };
+}
+
+/* ---------- state ---------- */
+const KEY = "mindpalace.v1";
+let state = { a: {}, cur: 0, streak: 0 };
+try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.a) state = { a: s.a, cur: s.cur || 0, streak: s.streak || 0 }; } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+let filter = null;
+let q = null;
+const m = /^#q-(\d+)$/.exec(location.hash);
+if (m && +m[1] >= 1 && +m[1] <= TOTAL) state.cur = +m[1] - 1;
+
+/* ---------- UI ---------- */
+const $ = id => document.getElementById(id);
+function renderCats() {
+  const el = $("cats");
+  el.innerHTML = "";
+  [{ id: null, name: "All puzzles" }, ...TYPES].forEach(t => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.id = "cat-" + (t.id || "all");
+    b.setAttribute("aria-pressed", String(filter === t.id));
+    b.innerHTML = `${t.name} <small>${t.id ? 100 : 1000}</small>`;
+    b.onclick = () => { filter = t.id; renderCats(); renderBoardDim(); if (filter && typeOf(state.cur).id !== filter) go(nextIndex(state.cur, 1, false, true)); };
+    el.appendChild(b);
+  });
+}
+function matches(n) { return !filter || typeOf(n).id === filter; }
+function nextIndex(from, dir, unsolvedOnly, includeSelf) {
+  for (let s = includeSelf ? 0 : 1; s <= TOTAL; s++) {
+    const n = ((from + dir * s) % TOTAL + TOTAL) % TOTAL;
+    if (matches(n) && (!unsolvedOnly || !state.a[n])) return n;
+  }
+  return from;
+}
+function renderQuestion() {
+  const n = state.cur;
+  q = build(n);
+  const t = typeOf(n), lv = levelOf(n), ans = state.a[n];
+  $("case-no").innerHTML = `Puzzle <span>#${n + 1}</span>`;
+  $("case-cat").textContent = t.name;
+  $("case-lvl").innerHTML = Array.from({ length: 10 }, (_, i) => `<i class="${i < lv ? "on" : ""}"></i>`).join("");
+  $("case-lvl").setAttribute("aria-label", `Difficulty ${lv} of 10`);
+  $("plate").innerHTML = q.draw(!!ans);
+  $("prompt").textContent = q.prompt;
+  const opts = $("opts");
+  opts.innerHTML = "";
+  q.options.forEach((o, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "opt"; b.id = "opt-" + i;
+    b.innerHTML = `<kbd>${i + 1}</kbd>` + (typeof o === "object" ? `<span class="pic">${o.pic}</span>` : `<span class="val">${o}</span>`);
+    b.setAttribute("aria-label", `Option ${i + 1}`);
+    if (ans) {
+      b.disabled = true;
+      if (i === q.correct) b.classList.add("right");
+      else if (i === ans.c) b.classList.add("wrong");
+    }
+    b.onclick = () => answer(i);
+    opts.appendChild(b);
+  });
+  const v = $("verdict");
+  if (ans) {
+    v.hidden = false;
+    v.className = "verdict " + (ans.ok ? "good" : "bad");
+    v.innerHTML = `<b>${ans.ok ? "Elementary." : "Not quite."}</b><span>${q.explain}</span>`;
+  } else v.hidden = true;
+  try { history.replaceState(null, "", "#q-" + (n + 1)); } catch (e) {}
+  document.querySelectorAll(".tile.cur").forEach(t => t.classList.remove("cur"));
+  const tile = $("t-" + n); if (tile) tile.classList.add("cur");
+}
+function answer(i) {
+  const n = state.cur;
+  if (state.a[n]) return;
+  const ok = i === q.correct;
+  state.a[n] = { c: i, ok };
+  state.streak = ok ? state.streak + 1 : 0;
+  save();
+  renderQuestion(); renderScore(); paintTile(n);
+  $("next").focus();
+}
+function go(n) { state.cur = n; save(); renderQuestion(); }
+function renderScore() {
+  const vals = Object.values(state.a), done = vals.length, ok = vals.filter(v => v.ok).length;
+  $("s-done").textContent = `${done}/${TOTAL}`;
+  $("s-acc").textContent = done ? Math.round(ok / done * 100) + "%" : "–";
+  $("s-streak").textContent = state.streak;
+  $("record").innerHTML = TYPES.map((t, ti) => {
+    let d = 0, k = 0;
+    for (const [n, v] of Object.entries(state.a)) if (+n % TYPES.length === ti) { d++; if (v.ok) k++; }
+    return `<div class="rec"><span>${t.name}</span><span class="bar"><i style="width:${d ? k / d * 100 : 0}%"></i></span><span>${d ? k + "/" + d : "—"}</span></div>`;
+  }).join("");
+}
+function paintTile(n) {
+  const t = $("t-" + n), v = state.a[n];
+  t.classList.toggle("ok", !!v && v.ok);
+  t.classList.toggle("no", !!v && !v.ok);
+  t.setAttribute("aria-label", `Puzzle ${n + 1}, ${typeOf(n).name}${v ? (v.ok ? ", solved" : ", missed") : ""}`);
+}
+function renderBoard() {
+  const el = $("board"), frag = document.createDocumentFragment();
+  for (let n = 0; n < TOTAL; n++) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tile"; b.id = "t-" + n; b.title = `#${n + 1} · ${typeOf(n).name}`;
+    b.onclick = () => go(n);
+    frag.appendChild(b);
+  }
+  el.appendChild(frag);
+  for (let n = 0; n < TOTAL; n++) paintTile(n);
+}
+function renderBoardDim() { for (let n = 0; n < TOTAL; n++) $("t-" + n).classList.toggle("dim", !matches(n)); }
+
+$("next").onclick = () => go(nextIndex(state.cur, 1, false));
+$("prev").onclick = () => go(nextIndex(state.cur, -1, false));
+$("unsolved").onclick = () => go(nextIndex(state.cur, 1, true));
+$("jump").addEventListener("change", e => { const v = parseInt(e.target.value, 10); if (v >= 1 && v <= TOTAL) { filter = null; renderCats(); renderBoardDim(); go(v - 1); } e.target.value = ""; });
+let resetArmed = null;
+$("reset").onclick = () => {
+  const b = $("reset");
+  if (!resetArmed) { b.textContent = "Click again to erase all answers"; resetArmed = setTimeout(() => { b.textContent = "Reset progress"; resetArmed = null; }, 3500); return; }
+  clearTimeout(resetArmed); resetArmed = null; b.textContent = "Reset progress";
+  state = { a: {}, cur: 0, streak: 0 }; save();
+  for (let n = 0; n < TOTAL; n++) paintTile(n);
+  renderScore(); renderQuestion();
+};
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT" || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (/^[1-4]$/.test(e.key) && q && +e.key <= q.options.length) answer(+e.key - 1);
+  else if (e.key === "ArrowRight") $("next").click();
+  else if (e.key === "ArrowLeft") $("prev").click();
+});
+
+renderCats(); renderBoard(); renderScore(); renderQuestion();
+</script>
+</body>
+</html>
