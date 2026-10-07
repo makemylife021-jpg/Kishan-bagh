@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kishan Bagh</title>
+<meta name="description" content="Kishan Bagh — a farmer's garden. Seasonal produce through Rabi, Kharif and Zaid.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Hind:wght@400;500;600&family=Tiro+Devanagari+Hindi&display=swap">
+<style>
+/* Layout: field rows — a tall Devanagari masthead, then a 12-month furrow strip that is the page's working tool. */
+:root {
+  --bg: #f3f5ec;          /* green-tinted daylight */
+  --surface: #e6ebd8;
+  --fg: #1f2a1a;          /* deep leaf */
+  --muted: #5a6650;
+  --leaf: #2f5d34;        /* mango leaf */
+  --haldi: #d9a21b;       /* turmeric */
+  --soil: #7a4e2d;
+  --rabi: #3d7a8c;        /* cool winter crop */
+  --kharif: #2f7d3a;      /* monsoon crop */
+  --zaid: #c9861a;        /* summer crop */
+  --line: #c9d1b6;
+  --font-display: "Rozha One", "Georgia", serif;
+  --font-deva: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif;
+  --font-body: "Hind", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141a12; --surface: #1d2619; --fg: #e8eedc; --muted: #a3ae95;
+    --leaf: #8cc488; --haldi: #f0bd3e; --soil: #c79a72;
+    --rabi: #79b8c9; --kharif: #7fc684; --zaid: #e6a94a; --line: #33402c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141a12; --surface: #1d2619; --fg: #e8eedc; --muted: #a3ae95;
+  --leaf: #8cc488; --haldi: #f0bd3e; --soil: #c79a72;
+  --rabi: #79b8c9; --kharif: #7fc684; --zaid: #e6a94a; --line: #33402c;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 1.05rem/1.65 var(--font-body);
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; line-height: 1.1; text-wrap: balance; margin: 0; }
+p { margin: 0; max-width: 62ch; }
+.eyebrow { font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+a { color: var(--leaf); }
+:focus-visible { outline: 3px solid var(--haldi); outline-offset: 3px; border-radius: 4px; }
+
+/* Masthead */
+.mast { padding-block: 56px 40px; display: grid; gap: 28px; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: end; }
+.mast .deva { font-family: var(--font-deva); font-size: clamp(4rem, 13vw, 9rem); line-height: .95; color: var(--leaf); }
+.mast h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-top: 10px; }
+.mast h1 span { color: var(--haldi); }
+.mast .lede { display: grid; gap: 16px; }
+.mast .lede p { color: var(--muted); }
+.today { display: inline-flex; gap: 10px; align-items: center; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; font-size: .92rem; width: fit-content; }
+.today i { width: 10px; height: 10px; border-radius: 50%; background: var(--season-color, var(--kharif)); display: inline-block; }
+
+/* Furrows — decorative field rows */
+.furrows { height: 46px; background: repeating-linear-gradient(90deg, var(--soil) 0 2px, transparent 2px 14px); opacity: .28; -webkit-mask: linear-gradient(transparent, #000 40%, #000 60%, transparent); mask: linear-gradient(transparent, #000 40%, #000 60%, transparent); }
+
+/* Calendar tool */
+.cal { padding-block: 48px; display: grid; gap: 24px; }
+.cal header { display: flex; flex-wrap: wrap; gap: 12px 32px; align-items: end; justify-content: space-between; }
+.cal h2 { font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+.legend button {
+  font: 500 .92rem var(--font-body); color: var(--fg); background: transparent; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; display: inline-flex; gap: 8px; align-items: center;
+}
+.legend button i { width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
+.legend button[aria-pressed="true"] { background: var(--surface); border-color: var(--c); }
+
+.strip-scroll { overflow-x: auto; }
+.strip { display: grid; grid-template-columns: repeat(12, minmax(56px, 1fr)); gap: 4px; min-width: 680px; }
+.month {
+  font: 500 .9rem var(--font-body); color: var(--fg); background: var(--surface); border: 1px solid transparent;
+  border-radius: 6px; padding: 10px 6px 8px; cursor: pointer; display: grid; gap: 8px; text-align: center;
+}
+.month small { font-family: var(--font-deva); color: var(--muted); font-size: .85rem; }
+.month .bars { display: grid; gap: 3px; }
+.month .bars span { height: 6px; border-radius: 3px; background: var(--c); opacity: .18; }
+.month .bars span.on { opacity: 1; }
+.month[aria-current="date"] { border-color: var(--haldi); }
+.month[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.month[aria-pressed="true"] small { color: var(--bg); opacity: .75; }
+
+.detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 32px; padding-top: 8px; }
+.detail h3 { font-size: 2rem; }
+.detail .deva-sm { font-family: var(--font-deva); color: var(--muted); font-size: 1.2rem; }
+.tasks { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.task { border-top: 3px solid var(--c); padding-top: 10px; display: grid; gap: 6px; min-width: 0; }
+.task .eyebrow { color: var(--c); }
+.task ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.task li { background: var(--surface); border-radius: 4px; padding: 2px 10px; font-size: .95rem; }
+.task .none { color: var(--muted); font-size: .95rem; }
+
+/* Seasons */
+.seasons { padding-block: 48px; display: grid; gap: 28px; }
+.seasons h2 { font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.season-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+.season { display: grid; gap: 8px; align-content: start; }
+.season .name { display: flex; align-items: baseline; gap: 12px; }
+.season h3 { font-size: 1.7rem; color: var(--c); }
+.season .deva-sm { font-family: var(--font-deva); color: var(--muted); }
+.season .span { font-variant-numeric: tabular-nums; font-weight: 600; font-size: .95rem; }
+.season p { color: var(--muted); }
+
+/* Principles */
+.ways { padding-block: 48px 64px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 32px; border-top: 1px solid var(--line); }
+.ways h2 { font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.ways dl { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 16px 24px; }
+.ways dt { font-family: var(--font-deva); font-size: 1.3rem; color: var(--leaf); }
+.ways dd { margin: 0; }
+.ways dd b { display: block; }
+.ways dd span { color: var(--muted); }
+
+footer { padding-block: 28px; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+@media (max-width: 760px) {
+  .mast, .detail, .ways { grid-template-columns: minmax(0, 1fr); }
+  .season-grid { grid-template-columns: minmax(0, 1fr); }
+  .mast { padding-block: 36px 24px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .task { animation: rise .35s ease both; }
+  @keyframes rise { from { transform: translateY(6px); } to { transform: none; } }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <section class="mast">
+    <div>
+      <div class="deva" lang="hi">किसान बाग</div>
+      <h1>Kishan Bagh, <span>a farmer's garden</span></h1>
+    </div>
+    <div class="lede">
+      <p>We grow by the Indian crop calendar: wheat and mustard through the cool Rabi months, rice and millets with the monsoon, melons and greens in the short Zaid summer.</p>
+      <div class="today" id="today"><i></i><span>Loading this month…</span></div>
+    </div>
+  </section>
+</div>
+
+<div class="furrows" aria-hidden="true"></div>
+
+<div class="wrap">
+  <section class="cal" aria-labelledby="cal-h">
+    <header>
+      <div>
+        <div class="eyebrow">Fasal calendar</div>
+        <h2 id="cal-h">What's in the field each month</h2>
+      </div>
+      <div class="legend" role="group" aria-label="Filter by season" id="legend"></div>
+    </header>
+    <div class="strip-scroll"><div class="strip" id="strip"></div></div>
+    <div class="detail" id="detail" aria-live="polite"></div>
+  </section>
+
+  <section class="seasons" aria-labelledby="seasons-h">
+    <div>
+      <div class="eyebrow">Three seasons</div>
+      <h2 id="seasons-h">Rabi, Kharif, Zaid</h2>
+    </div>
+    <div class="season-grid" id="seasons"></div>
+  </section>
+
+  <section class="ways" aria-labelledby="ways-h">
+    <div>
+      <div class="eyebrow">How we farm</div>
+      <h2 id="ways-h">Old practice, kept on purpose</h2>
+    </div>
+    <dl>
+      <dt lang="hi">फसल चक्र</dt>
+      <dd><b>Crop rotation</b><span>Pulses follow cereals so the soil gets its nitrogen back without a bag of urea.</span></dd>
+      <dt lang="hi">जीवामृत</dt>
+      <dd><b>Jeevamrut</b><span>A fermented mix of cow dung, jaggery and gram flour that feeds the soil's microbes.</span></dd>
+      <dt lang="hi">मेड़बंदी</dt>
+      <dd><b>Field bunds</b><span>Earthen ridges hold monsoon rain on the land instead of letting it run off with the topsoil.</span></dd>
+      <dt lang="hi">देसी बीज</dt>
+      <dd><b>Native seed</b><span>We save seed from our best plants each season and sow it again the next year.</span></dd>
+    </dl>
+  </section>
+
+  <footer>
+    <span lang="hi">किसान बाग · Kishan Bagh</span>
+    <span>Seasons follow the North Indian calendar; local timing shifts with rain and region.</span>
+  </footer>
+</div>
+
+<script>
+const SEASONS = {
+  rabi:   { name: "Rabi",   hi: "रबी",   span: "Oct – Mar", c: "var(--rabi)",
+            text: "Sown after the monsoon withdraws, grown through the cool dry winter, harvested in spring." },
+  kharif: { name: "Kharif", hi: "खरीफ़", span: "Jun – Oct", c: "var(--kharif)",
+            text: "Sown with the first monsoon rains and harvested as the rains end in autumn." },
+  zaid:   { name: "Zaid",   hi: "ज़ायद",  span: "Mar – Jun", c: "var(--zaid)",
+            text: "A short, hot window between the two main seasons, for fast crops on irrigated land." }
+};
+// Per month: what is sown, growing, harvested in each season (0 = January).
+const MONTHS = [
+  { en: "Jan", hi: "माघ",     sow: {}, grow: { rabi: ["Wheat", "Mustard", "Gram", "Peas"] }, harvest: { rabi: ["Peas", "Carrot", "Cauliflower"] } },
+  { en: "Feb", hi: "फाल्गुन",  sow: { zaid: ["Bottle gourd"] }, grow: { rabi: ["Wheat", "Gram", "Barley"] }, harvest: { rabi: ["Mustard", "Potato"] } },
+  { en: "Mar", hi: "चैत्र",    sow: { zaid: ["Watermelon", "Muskmelon", "Cucumber"] }, grow: { rabi: ["Wheat"] }, harvest: { rabi: ["Gram", "Barley", "Lentil"] } },
+  { en: "Apr", hi: "वैशाख",   sow: { zaid: ["Moong", "Okra"] }, grow: { zaid: ["Watermelon", "Cucumber"] }, harvest: { rabi: ["Wheat"] } },
+  { en: "May", hi: "ज्येष्ठ",  sow: {}, grow: { zaid: ["Moong", "Okra", "Muskmelon"] }, harvest: { zaid: ["Watermelon", "Cucumber", "Bottle gourd"] } },
+  { en: "Jun", hi: "आषाढ़",    sow: { kharif: ["Rice nursery", "Bajra", "Maize"] }, grow: {}, harvest: { zaid: ["Muskmelon", "Moong", "Okra"] } },
+  { en: "Jul", hi: "श्रावण",   sow: { kharif: ["Rice transplant", "Soybean", "Arhar", "Cotton"] }, grow: { kharif: ["Maize", "Bajra"] }, harvest: {} },
+  { en: "Aug", hi: "भाद्रपद",  sow: { kharif: ["Urad"] }, grow: { kharif: ["Rice", "Soybean", "Cotton", "Arhar"] }, harvest: { kharif: ["Early maize"] } },
+  { en: "Sep", hi: "आश्विन",  sow: {}, grow: { kharif: ["Rice", "Cotton", "Arhar"] }, harvest: { kharif: ["Maize", "Bajra", "Urad"] } },
+  { en: "Oct", hi: "कार्तिक",  sow: { rabi: ["Mustard", "Gram", "Potato"] }, grow: { kharif: ["Cotton", "Arhar"] }, harvest: { kharif: ["Rice", "Soybean"] } },
+  { en: "Nov", hi: "मार्गशीर्ष", sow: { rabi: ["Wheat", "Peas", "Lentil", "Barley"] }, grow: { rabi: ["Mustard", "Gram"] }, harvest: { kharif: ["Cotton", "Late rice"] } },
+  { en: "Dec", hi: "पौष",     sow: { rabi: ["Late wheat"] }, grow: { rabi: ["Wheat", "Mustard", "Gram", "Potato"] }, harvest: { kharif: ["Arhar"] } }
+];
+const FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const now = new Date().getMonth();
+let selected = now;
+let filter = null;
+
+function seasonsIn(m) {
+  const s = new Set();
+  ["sow", "grow", "harvest"].forEach(k => Object.keys(m[k]).forEach(x => s.add(x)));
+  return s;
+}
+function crops(group) {
+  return Object.entries(group).filter(([k]) => !filter || k === filter);
+}
+function renderLegend() {
+  const el = document.getElementById("legend");
+  el.innerHTML = "";
+  Object.entries(SEASONS).forEach(([k, s]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.id = "f-" + k; b.style.setProperty("--c", s.c);
+    b.setAttribute("aria-pressed", String(filter === k));
+    b.innerHTML = `<i></i>${s.name} <span lang="hi">${s.hi}</span>`;
+    b.onclick = () => { filter = filter === k ? null : k; renderAll(); };
+    el.appendChild(b);
+  });
+}
+function renderStrip() {
+  const el = document.getElementById("strip");
+  el.innerHTML = "";
+  MONTHS.forEach((m, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "month"; b.id = "m-" + i;
+    b.setAttribute("aria-pressed", String(i === selected));
+    b.setAttribute("aria-label", FULL[i]);
+    if (i === now) b.setAttribute("aria-current", "date");
+    const active = seasonsIn(m);
+    const bars = Object.entries(SEASONS)
+      .filter(([k]) => !filter || k === filter)
+      .map(([k, s]) => `<span style="--c:${s.c}" class="${active.has(k) ? "on" : ""}"></span>`).join("");
+    b.innerHTML = `<span>${m.en}</span><small lang="hi">${m.hi}</small><span class="bars">${bars}</span>`;
+    b.onclick = () => { selected = i; renderAll(); };
+    el.appendChild(b);
+  });
+}
+function taskBlock(label, group, color) {
+  const rows = crops(group);
+  const items = rows.flatMap(([k, list]) => list.map(c => `<li title="${SEASONS[k].name}">${c}</li>`)).join("");
+  const c = rows.length === 1 ? SEASONS[rows[0][0]].c : color;
+  return `<div class="task" style="--c:${c}"><div class="eyebrow">${label}</div>` +
+    (items ? `<ul>${items}</ul>` : `<span class="none">Nothing${filter ? " for " + SEASONS[filter].name : ""} this month</span>`) + `</div>`;
+}
+function renderDetail() {
+  const m = MONTHS[selected];
+  document.getElementById("detail").innerHTML =
+    `<div><div class="eyebrow">${selected === now ? "This month" : "Selected month"}</div>
+       <h3>${FULL[selected]}</h3><div class="deva-sm" lang="hi">${m.hi}</div></div>
+     <div class="tasks">
+       ${taskBlock("Sowing", m.sow, "var(--soil)")}
+       ${taskBlock("Growing", m.grow, "var(--leaf)")}
+       ${taskBlock("Harvesting", m.harvest, "var(--haldi)")}
+     </div>`;
+}
+function renderToday() {
+  const m = MONTHS[now];
+  const main = Object.keys(m.harvest)[0] || Object.keys(m.sow)[0] || Object.keys(m.grow)[0];
+  const t = document.getElementById("today");
+  t.style.setProperty("--season-color", SEASONS[main].c);
+  const h = Object.values(m.harvest).flat();
+  t.querySelector("span").textContent = h.length
+    ? `${FULL[now]}: harvesting ${h.slice(0, 2).join(" and ").toLowerCase()}`
+    : `${FULL[now]}: ${SEASONS[main].name} season`;
+}
+function renderSeasons() {
+  document.getElementById("seasons").innerHTML = Object.values(SEASONS).map(s =>
+    `<div class="season" style="--c:${s.c}">
+       <div class="name"><h3>${s.name}</h3><span class="deva-sm" lang="hi">${s.hi}</span></div>
+       <div class="span">${s.span}</div><p>${s.text}</p></div>`).join("");
+}
+function renderAll() { renderLegend(); renderStrip(); renderDetail(); }
+renderToday(); renderSeasons(); renderAll();
+</script>
+</body>
+</html>
