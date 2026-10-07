@@ -14,8 +14,8 @@ to match your own fields.
 
 ## Mind Palace
 
-`mind-palace/index.html` is a separate, self-contained puzzle site: 1000 picture puzzles in
-ten categories (counting, odd one out, sequences, clocks, hidden numbers, mirror images,
+`mind-palace/index.html` is a separate, self-contained puzzle site: 1100 picture puzzles in
+eleven categories (Sherlock-style deduction cases, counting, odd one out, sequences, clocks, hidden numbers, mirror images,
 rotations, shape algebra, tangled lines, spot the difference). Every picture is drawn in the
-browser from a fixed seed, so puzzle #n is always the same. Difficulty rises every 100
+browser from a fixed seed, so puzzle #n is always the same. Difficulty rises every 110
 puzzles, and progress is saved in the visitor's browser.

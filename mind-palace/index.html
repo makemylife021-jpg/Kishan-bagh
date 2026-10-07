@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mind Palace</title>
-<meta name="description" content="1000 picture puzzles for the observant eye: counting, odd one out, sequences, clocks, hidden numbers, mirrors, rotations, shape algebra, tangled lines and spot the difference.">
+<meta name="description" content="1100 picture puzzles for the observant eye: Sherlock-style deduction cases, counting, odd one out, sequences, clocks, hidden numbers, mirrors, rotations, shape algebra, tangled lines and spot the difference.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@500&display=swap">
 <style>
-/* Layout: a detective's desk — the puzzle on the left as the case in hand, the 1000-cell case board on the right. */
+/* Layout: a detective's desk — the puzzle on the left as the case in hand, the 1100-cell case board on the right. */
 :root {
   --bg: #e9ecf0;        /* London fog */
   --surface: #f7f8fa;
@@ -77,6 +77,7 @@ header.top p { margin: 4px 0 0; color: var(--muted); }
 .opt:hover:not(:disabled) { border-color: var(--brass); }
 .opt kbd { font: 500 .75rem var(--font-mono); color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
 .opt .val { font: 500 1.1rem var(--font-mono); }
+.opt .val.word { font: 600 1.05rem var(--font-body); }
 .opt .pic { background: var(--paper); border-radius: 4px; flex: 1; display: flex; justify-content: center; }
 .opt .pic svg { width: 100%; max-width: 120px; height: auto; display: block; }
 .opt.right { border-color: var(--good); box-shadow: inset 0 0 0 2px var(--good); }
@@ -130,7 +131,7 @@ footer { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--line);
   <header class="top">
     <div>
       <h1>Mind Palace</h1>
-      <p>1000 picture puzzles. You see, but do you observe?</p>
+      <p>1100 picture puzzles, Sherlock cases included. You see, but do you observe?</p>
     </div>
     <div class="score" aria-live="polite">
       <div><b id="s-done">0</b><span>Solved</span></div>
@@ -156,7 +157,7 @@ footer { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--line);
         <button class="btn primary" id="next" type="button">Next →</button>
         <button class="btn" id="unsolved" type="button">Next unsolved</button>
         <label class="jump" for="jump">Go to
-          <input id="jump" type="number" min="1" max="1000" inputmode="numeric" placeholder="1–1000">
+          <input id="jump" type="number" min="1" max="1100" inputmode="numeric" placeholder="1–1100">
         </label>
       </div>
     </section>
@@ -173,7 +174,7 @@ footer { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--line);
           <span><i style="background:var(--line)"></i>Open</span>
           <span><i style="background:var(--good)"></i>Solved</span>
           <span><i style="background:var(--bad)"></i>Missed</span>
-          <span>Difficulty rises every 100 puzzles</span>
+          <span>Difficulty rises every 110 puzzles</span>
         </div>
       </section>
     </aside>
@@ -570,8 +571,194 @@ function genDiff(r, l) {
   };
 }
 
+/* ---------- 11. Sherlock cases ---------- */
+const SK = "#d9a07a", DK = "#8a5a3a";
+const ICONS = {
+  hand: `<path d="M18 58 L16 30 Q16 24 20 24 Q24 24 24 30 L24 12 Q24 7 28 7 Q32 7 32 12 L32 10 Q32 5 36 5 Q40 5 40 10 L40 14 Q40 9 44 9 Q48 9 48 14 L48 40 Q48 56 36 58 Z" fill="${SK}" stroke="${INK}" stroke-width="2"/>`,
+  arm: `<rect x="4" y="22" width="52" height="18" rx="9" fill="${SK}" stroke="${INK}" stroke-width="2"/><path d="M30 23 H47 A8 8 0 0 1 47 39 H30 Z" fill="${DK}"/>`,
+  shoe: `<path d="M4 46 Q4 26 16 24 L30 30 Q52 32 56 44 L56 50 L4 50 Z" fill="#4a3428" stroke="${INK}" stroke-width="2"/><rect x="4" y="48" width="52" height="6" rx="2" fill="${INK}"/>`,
+  keychain: `<circle cx="11" cy="30" r="8" fill="none" stroke="#9aa0a6" stroke-width="3"/><rect x="19" y="17" width="38" height="26" rx="4" fill="#e8b81c" stroke="#b02a1a" stroke-width="2"/><text x="38" y="34" font-family="${MONO}" font-size="7" fill="#b02a1a" text-anchor="middle">HORN OK</text>`,
+  notebook: `<rect x="12" y="5" width="38" height="50" rx="2" fill="#f6f0dc" stroke="${INK}" stroke-width="2"/><line x1="19" y1="5" x2="19" y2="55" stroke="#c0392b"/>` + [16, 23, 30, 37, 44].map(y => `<line x1="23" y1="${y}" x2="45" y2="${y}" stroke="#5b6475"/>`).join(""),
+  flask: `<rect x="20" y="14" width="22" height="42" rx="6" fill="#a9adb0" stroke="${INK}" stroke-width="2"/><rect x="23" y="5" width="16" height="11" rx="2" fill="#6d7276"/>`,
+  receipt: `<path d="M14 4 H46 V52 L42 56 L38 52 L34 56 L30 52 L26 56 L22 52 L18 56 L14 52 Z" fill="#fff" stroke="${INK}" stroke-width="2"/>` + [14, 21, 28, 35, 42].map((y, i) => `<line x1="19" y1="${y}" x2="${i % 2 ? 34 : 41}" y2="${y}" stroke="#5b6475"/>`).join(""),
+  coin: `<circle cx="30" cy="30" r="20" fill="#c8a24a" stroke="#8a6a22" stroke-width="2"/><text x="30" y="37" font-family="${SERIF}" font-size="20" fill="#7a5a12" text-anchor="middle">₹</text>`,
+  watch: `<rect x="23" y="2" width="14" height="56" rx="3" fill="#6b4a2f"/><circle cx="30" cy="30" r="15" fill="#fff" stroke="${INK}" stroke-width="3"/><path d="M30 30 V20 M30 30 L37 33" stroke="${INK}" stroke-width="2"/>`,
+  ticket: `<rect x="4" y="16" width="52" height="28" rx="3" fill="#f3d9a4" stroke="${INK}" stroke-width="2"/><line x1="40" y1="16" x2="40" y2="44" stroke="${INK}" stroke-dasharray="3 3"/><line x1="10" y1="26" x2="34" y2="26" stroke="#5b6475"/><line x1="10" y1="33" x2="28" y2="33" stroke="#5b6475"/>`,
+  key: `<circle cx="16" cy="30" r="10" fill="none" stroke="#b08d2e" stroke-width="5"/><path d="M26 30 H54 M46 30 V38 M52 30 V36" stroke="#b08d2e" stroke-width="5"/>`,
+  pen: `<g transform="rotate(-35 30 30)"><rect x="6" y="26" width="40" height="8" rx="2" fill="#2f6fd6" stroke="${INK}" stroke-width="1.5"/><path d="M46 26 L56 30 L46 34 Z" fill="#e8e3d6" stroke="${INK}" stroke-width="1.5"/></g>`,
+  glasses: `<circle cx="17" cy="32" r="11" fill="#cfe3f5" stroke="${INK}" stroke-width="3"/><circle cx="43" cy="32" r="11" fill="#cfe3f5" stroke="${INK}" stroke-width="3"/><path d="M28 30 Q30 26 32 30" fill="none" stroke="${INK}" stroke-width="3"/>`,
+  sleeve: `<path d="M4 8 H38 L56 38 L22 56 Z" fill="#e3e9f2" stroke="${INK}" stroke-width="2"/><path d="M38 8 L56 38 L50 41 L33 11 Z" fill="#c9d3e2" stroke="${INK}" stroke-width="1.5"/><circle cx="46" cy="30" r="2" fill="${INK}"/>`,
+  trousers: `<path d="M14 4 H46 L50 56 H34 L30 22 L26 56 H10 Z" fill="#f2f2ee" stroke="${INK}" stroke-width="2"/>`,
+  bag: `<path d="M16 22 Q16 6 30 6 Q44 6 44 22" fill="none" stroke="${INK}" stroke-width="3"/><rect x="8" y="22" width="44" height="32" rx="4" fill="#8b5a3c" stroke="${INK}" stroke-width="2"/>`,
+  phone: `<rect x="17" y="4" width="26" height="52" rx="5" fill="${INK}"/><rect x="20" y="10" width="20" height="38" fill="#9cc3e6"/>`,
+  spool: `<rect x="16" y="6" width="28" height="7" fill="#c49a6c" stroke="${INK}"/><rect x="20" y="13" width="20" height="34" fill="#c0392b"/><rect x="16" y="47" width="28" height="7" fill="#c49a6c" stroke="${INK}"/>`,
+  ball: `<circle cx="30" cy="30" r="21" fill="#a8261f" stroke="${INK}" stroke-width="2"/><path d="M14 16 Q30 30 46 44" fill="none" stroke="#f3e6c8" stroke-width="2" stroke-dasharray="3 2"/>`,
+  leaf: `<path d="M8 52 Q8 10 52 8 Q50 50 8 52 Z" fill="#5f8f3a" stroke="${INK}" stroke-width="2"/><path d="M8 52 L40 20" stroke="#2f4a1d" stroke-width="2"/>`,
+  card: `<path d="M22 4 L30 20 L38 4" fill="none" stroke="#2f6fd6" stroke-width="3"/><rect x="12" y="20" width="36" height="36" rx="3" fill="#fff" stroke="${INK}" stroke-width="2"/><rect x="17" y="26" width="12" height="14" fill="#9aa0a6"/><line x1="32" y1="30" x2="43" y2="30" stroke="#5b6475"/><line x1="17" y1="48" x2="43" y2="48" stroke="#5b6475"/>`,
+  jar: `<rect x="14" y="16" width="32" height="40" rx="6" fill="#e6a317" stroke="${INK}" stroke-width="2"/><rect x="16" y="8" width="28" height="9" rx="2" fill="#7a4e2d"/>`,
+  tape: `<circle cx="30" cy="30" r="22" fill="${INK}"/><circle cx="30" cy="30" r="10" fill="#f6efdc"/>`,
+  tool: `<g transform="rotate(-35 30 30)"><rect x="4" y="25" width="20" height="10" rx="3" fill="#e6b01e" stroke="${INK}"/><rect x="24" y="28" width="30" height="4" fill="#9aa0a6"/></g>`,
+  fish: `<path d="M8 30 Q24 12 42 30 Q24 48 8 30 Z" fill="#8fa9b8" stroke="${INK}" stroke-width="2"/><path d="M42 30 L56 20 L56 40 Z" fill="#8fa9b8" stroke="${INK}" stroke-width="2"/><circle cx="16" cy="28" r="2" fill="${INK}"/>`,
+  book: `<rect x="8" y="38" width="44" height="10" fill="#2f6fd6" stroke="${INK}"/><rect x="10" y="28" width="42" height="10" fill="#d64541" stroke="${INK}"/><rect x="6" y="18" width="44" height="10" fill="#2e9e5b" stroke="${INK}"/><rect x="9" y="8" width="42" height="10" fill="#e6b01e" stroke="${INK}"/>`,
+  calendar: `<rect x="6" y="10" width="48" height="44" rx="3" fill="#fff" stroke="${INK}" stroke-width="2"/><rect x="6" y="10" width="48" height="10" fill="#8c2f2b"/>` + [0, 1, 2].map(r => [0, 1, 2, 3].map(c => `<rect x="${11 + c * 11}" y="${25 + r * 9}" width="7" height="6" fill="${r === 1 && c === 2 ? "#d64541" : "#d2d7df"}"/>`).join("")).join(""),
+  umbrella: `<path d="M6 30 Q30 2 54 30 Z" fill="${INK}"/><path d="M30 30 V50 Q30 56 24 54" fill="none" stroke="${INK}" stroke-width="3"/>`,
+  cup: `<path d="M16 12 H44 L40 56 H20 Z" fill="#eef2f4" stroke="${INK}" stroke-width="2"/><path d="M18 22 H42 L39 54 H21 Z" fill="#c68b4a"/>`,
+  face: `<ellipse cx="30" cy="30" rx="20" ry="25" fill="${SK}" stroke="${INK}" stroke-width="2"/><circle cx="22" cy="27" r="2.5" fill="${INK}"/><circle cx="38" cy="27" r="2.5" fill="${INK}"/><path d="M23 42 Q30 46 37 42" fill="none" stroke="${INK}" stroke-width="2"/>`,
+  knife: `<path d="M6 34 L40 26 L54 30 L40 34 Z" fill="#c9cdd1" stroke="${INK}" stroke-width="1.5"/><rect x="2" y="31" width="16" height="7" rx="2" fill="#5a3a22"/>`,
+  pin: [14, 30, 46].map(x => `<line x1="${x}" y1="14" x2="${x + 4}" y2="54" stroke="#9aa0a6" stroke-width="2"/><circle cx="${x}" cy="12" r="5" fill="${x === 30 ? "#2f6fd6" : "#d64541"}"/>`).join("")
+};
+const PERSONAS = [
+  { name: "Long-haul truck driver", g: "road", clues: [
+    ["arm", "Right forearm much darker than the left", "The right arm sits in the sun at an open driver's window; Indian trucks have the driver on the right."],
+    ["keychain", "Keychain: HORN OK PLEASE, paint worn", "That slogan is painted on the back of goods trucks.", 1],
+    ["notebook", "Diary: km reading every 3 hours, all night", "About 300 km every three hours through the night is highway driving."],
+    ["hand", "Hard callus at the base of the left palm", "Years of working a gear lever with the left hand."],
+    ["shoe", "Fine orange desert sand in the treads", "Desert sand: they have come a long way, from the west."],
+    ["flask", "Flask of strong tea, on the third glass", "Staying awake through a night shift."]] },
+  { name: "Farmer", g: "land", clues: [
+    ["hand", "Soil packed deep under every fingernail", "Daily work in the soil."],
+    ["receipt", "Mandi slip: 12 quintal wheat sold", "Selling grain by the quintal at a market yard.", 1],
+    ["sleeve", "Wheat chaff caught inside the shirt cuff", "Fresh from threshing."],
+    ["calendar", "Calendar note: sow mustard by 20 Oct", "Planning by the Rabi sowing season."],
+    ["shoe", "Rubber chappals caked in wet mud", "Walking irrigated fields."],
+    ["face", "Deep sun lines, pale band on the forehead", "Outdoors all day under a pagri or cap."]] },
+  { name: "Surgeon", g: "care", clues: [
+    ["hand", "Nails cut very short, skin scrubbed dry", "Repeated surgical hand scrubbing."],
+    ["face", "Red pressure lines across nose and cheeks", "Hours behind a tight mask."],
+    ["pen", "Pen-torch clipped to the shirt pocket", "Used to check a patient's pupils.", 1],
+    ["phone", "Missed calls at 2:10, 3:45 and 5:00 a.m.", "On call through the night."],
+    ["shoe", "Rubber clogs with an iodine stain", "Theatre footwear; iodine is a surgical antiseptic."],
+    ["watch", "No watch, only a pale band on the wrist", "Watches come off before scrubbing in."]] },
+  { name: "Tailor", g: "craft", clues: [
+    ["hand", "Hard pad on the right middle finger", "Where a thimble pushes the needle."],
+    ["sleeve", "Loose threads of six colours on a sleeve", "Sewing different cloths all day."],
+    ["tape", "Cloth measuring tape round the neck", "Measuring customers.", 1],
+    ["pen", "Flat triangle of chalk in the pocket", "Tailor's chalk marks cutting lines on fabric."],
+    ["pin", "Three pins stuck in the shirt front", "Pins kept at hand for fittings."],
+    ["spool", "Half-used spool of red thread", "Thread for the day's work.", 1]] },
+  { name: "Schoolteacher", g: "desk", clues: [
+    ["sleeve", "White chalk dust on the right sleeve", "Writing on a blackboard."],
+    ["hand", "Red ink smudge on the side of a finger", "Correcting work in red."],
+    ["book", "Bundle of 40 exercise books, all labelled", "A whole class's homework.", 1],
+    ["face", "Hoarse voice, sucking a throat lozenge", "Talking over a classroom all day."],
+    ["calendar", "Timetable card: 8 periods, lunch at 1:20", "The shape of a school day."]] },
+  { name: "Fast bowler (cricketer)", g: "sport", clues: [
+    ["trousers", "Red smear on the right thigh of white trousers", "Shining a red ball on the trousers before each delivery."],
+    ["shoe", "Spiked shoes, right toe badly scuffed", "The front foot drags in a fast bowler's action."],
+    ["ball", "Red leather ball, one side polished", "Kept shiny on one side to make it swing.", 1],
+    ["face", "White zinc cream on nose and lips", "Long days in the sun on the field."],
+    ["hand", "Torn skin on the tips of two fingers", "Gripping the hard seam of the ball."]] },
+  { name: "Cook in a busy kitchen", g: "craft", clues: [
+    ["arm", "Small healed burns on both forearms", "Hot pans and tandoor edges."],
+    ["hand", "Yellow-stained nails, smells of cumin", "Turmeric and spices every day."],
+    ["knife", "Callus on the inside of the index finger", "Gripping a heavy kitchen knife."],
+    ["receipt", "Bill: 40 kg onions, 15 kg paneer", "Buying for a restaurant, not a home.", 1],
+    ["sleeve", "Crease at the waist from an apron string", "An apron worn all shift."]] },
+  { name: "Airline pilot", g: "road", clues: [
+    ["watch", "Watch set to two time zones", "Works across time zones."],
+    ["face", "Pale ring round the eyes from sunglasses", "Bright sun above the clouds."],
+    ["card", "Lanyard with an airline crew ID", "Crew identity card.", 1],
+    ["key", "Hotel key card from another city", "Overnight layovers away from home."],
+    ["bag", "Small wheeled bag, packed for one night", "A short trip, exactly to the rule."],
+    ["receipt", "Coffee bill, Terminal 2, 5:40 a.m.", "At the airport before dawn."]] },
+  { name: "Postman", g: "road", clues: [
+    ["bag", "Strap mark on the left shoulder only", "A heavy bag always carried on one side."],
+    ["trousers", "Chain grease on the right trouser cuff", "Rides a bicycle every day."],
+    ["receipt", "Bundle of signed delivery slips", "Proof of delivery for each address.", 1],
+    ["hand", "Rubber bands worn round the wrist", "Used to bundle letters by street."],
+    ["shoe", "Soles worn thin, evenly, at heel and toe", "Walks many kilometres a day."]] },
+  { name: "Sitar player", g: "art", clues: [
+    ["hand", "Hard grooves on the left fingertips", "Pressing metal strings down on frets."],
+    ["hand", "Wire plectrum mark on the right index finger", "A mizrab is worn there to pluck a sitar."],
+    ["notebook", "Notebook written in sargam: sa re ga ma", "Indian music notation."],
+    ["key", "Spare string and a tuning key", "Tuning and restringing an instrument."],
+    ["ticket", "Last night's concert programme", "Their name is in the programme.", 1]] },
+  { name: "Fisherman", g: "land", clues: [
+    ["shoe", "Boots with a white crust of salt", "Seawater dried in the sun."],
+    ["sleeve", "Silver fish scales stuck to the sleeve", "Handling the catch."],
+    ["hand", "Rope burns across both palms", "Hauling in nets."],
+    ["calendar", "Tide table folded in the pocket", "Going out and coming in with the tide."],
+    ["fish", "Smells of fish and diesel", "A boat engine and the catch.", 1]] },
+  { name: "Software developer", g: "desk", clues: [
+    ["hand", "Pink, shiny skin on the outer edge of both wrists", "Resting on a desk edge while typing."],
+    ["glasses", "Glasses with a blue anti-glare coating", "Long hours in front of a screen."],
+    ["phone", "Alert at 1:30 a.m.: 'Build failed'", "A software build broke overnight.", 1],
+    ["bag", "Laptop bag covered in tech stickers", "Stickers from developer meetups."],
+    ["cup", "Mug: 'It works on my machine'", "A programmer's oldest excuse."]] },
+  { name: "Beekeeper", g: "land", clues: [
+    ["hand", "Several small swollen stings on the hands", "Bees sting through gloves now and then."],
+    ["jar", "Jar of raw honey with comb inside", "Fresh from the hive.", 1],
+    ["sleeve", "Shirt smells of wood smoke, not tobacco", "Smoke calms bees before a hive is opened."],
+    ["bag", "Folded mesh veil in the bag", "Protects the face at the hives."],
+    ["leaf", "Yellow mustard pollen dusted on the cap", "Hives are set beside flowering fields."]] },
+  { name: "Electrician", g: "craft", clues: [
+    ["hand", "Tiny burn marks on two fingertips", "Small shocks and hot wires."],
+    ["tool", "Neon tester screwdriver in the shirt pocket", "Checking whether a wire is live.", 1],
+    ["tape", "Roll of black insulation tape", "Covering wire joints."],
+    ["sleeve", "Snipped copper wire bits in the cuff", "Stripping cable ends."],
+    ["shoe", "Thick rubber soles, no metal anywhere", "Insulation from the ground."]] },
+  { name: "Wedding photographer", g: "art", clues: [
+    ["face", "Squint lines around the right eye only", "The right eye stays pressed to a viewfinder."],
+    ["bag", "Strap mark on the neck, lens cap in pocket", "A heavy camera worn all day."],
+    ["card", "Two memory cards in a plastic case", "Storing the day's photos.", 1],
+    ["receipt", "Invoice: two days of event coverage", "Paid to cover a whole event."],
+    ["trousers", "Both knees dusty and worn", "Kneeling for low angles."]] }
+];
+const HERRINGS = [
+  ["coin", "One ₹10 coin and two ₹5 coins"], ["umbrella", "Black umbrella, completely dry"], ["phone", "Phone at 40%, cracked corner"],
+  ["key", "Plain house key on a ring"], ["ticket", "Cinema ticket from last Sunday"], ["watch", "Cheap digital watch, 2 minutes slow"],
+  ["cup", "Paper cup of sweet lassi"], ["book", "Paperback detective novel"], ["pen", "Blue ballpoint with a chewed cap"], ["glasses", "Reading glasses in a soft case"]
+];
+const SCENES = [
+  "A stranger stops at the gate and asks for water.", "Someone sits beside you on platform 3.", "A traveller shares your train compartment.",
+  "A visitor sits down at the tea stall.", "A guest arrives early at a wedding.", "Someone left these things on a park bench.",
+  "A patient waits in the clinic queue.", "A passenger dozes on the night bus."
+];
+function wrapText(t, max) {
+  const lines = [""];
+  t.split(" ").forEach(w => { const cur = lines[lines.length - 1]; if ((cur + " " + w).trim().length > max) lines.push(w); else lines[lines.length - 1] = (cur + " " + w).trim(); });
+  return lines;
+}
+function genCase(r, l) {
+  const pi = r.int(0, PERSONAS.length - 1), p = PERSONAS[pi];
+  const nClues = l <= 2 ? 5 : l <= 6 ? 4 : 3;
+  const pool = l >= 6 ? p.clues.filter(c => !c[3]) : p.clues;
+  const clues = r.shuffle(pool).slice(0, nClues);
+  const nHerr = l <= 3 ? 0 : l <= 6 ? 1 : l <= 8 ? 2 : 3;
+  const herrings = r.shuffle(HERRINGS).slice(0, nHerr);
+  const cards = r.shuffle([...clues.map(c => ({ i: c[0], t: c[1], real: true })), ...herrings.map(h => ({ i: h[0], t: h[1], real: false }))]);
+  const scene = r.pick(SCENES);
+  const rows = Math.ceil(cards.length / 3), W = 420, H = 18 + rows * 166;
+  const draw = reveal => {
+    let b = `<rect width="${W}" height="${H}" fill="#6b4a2f"/>` + Array.from({ length: Math.ceil(H / 22) }, (_, i) => `<path d="M0 ${i * 22 + 8} C120 ${i * 22 + 2} 280 ${i * 22 + 16} 420 ${i * 22 + 6}" stroke="#5c3f27" stroke-width="2" fill="none"/>`).join("");
+    cards.forEach((c, k) => {
+      const row = Math.floor(k / 3), inRow = Math.min(3, cards.length - row * 3), col = k % 3;
+      const x = (W - (inRow * 124 + (inRow - 1) * 12)) / 2 + col * 136, y = 12 + row * 166;
+      const tilt = ((k * 37 + pi * 11) % 7 - 3) * .8;
+      const lines = wrapText(c.t, 20);
+      b += `<g transform="rotate(${tilt} ${x + 62} ${y + 76})" opacity="${reveal && !c.real ? .45 : 1}">`
+        + `<rect x="${x + 3}" y="${y + 4}" width="124" height="152" fill="#000" opacity=".25"/>`
+        + `<rect x="${x}" y="${y}" width="124" height="152" fill="#f6efdc" stroke="${reveal && c.real ? "#e6a317" : "#e0d4b4"}" stroke-width="${reveal && c.real ? 4 : 1}"/>`
+        + `<g transform="translate(${x + 32} ${y + 10})">${ICONS[c.i]}</g>`
+        + lines.map((ln, j) => `<text x="${x + 62}" y="${y + 90 + j * 14}" font-family="${SERIF}" font-size="11.5" fill="${INK}" text-anchor="middle">${ln}</text>`).join("")
+        + (reveal && !c.real ? `<text x="${x + 62}" y="${y + 146}" font-family="${MONO}" font-size="9" fill="#8c2f2b" text-anchor="middle">PROVES NOTHING</text>` : "")
+        + `</g>`;
+    });
+    return svg(W, H, b);
+  };
+  const same = PERSONAS.filter((o, i) => i !== pi && o.g === p.g).map(o => o.name);
+  const other = PERSONAS.filter((o, i) => i !== pi && o.g !== p.g).map(o => o.name);
+  const distract = l >= 5 ? [...r.shuffle(same), ...r.shuffle(other)] : r.shuffle([...same, ...other]);
+  return {
+    prompt: `${scene} From what you can observe, what does this person do?`,
+    draw, options: uniqueOptions(p.name, distract),
+    explain: `${p.name}. ` + clues.map(c => c[2]).join(" ") + (herrings.length ? ` The ${herrings.length > 1 ? "other items prove" : "other item proves"} nothing.` : "")
+  };
+}
+
 /* ---------- catalogue ---------- */
 const TYPES = [
+  { id: "case", name: "Sherlock cases", gen: genCase },
   { id: "count", name: "Counting", gen: genCount },
   { id: "odd", name: "Odd one out", gen: genOdd },
   { id: "seq", name: "Sequences", gen: genSeq },
@@ -583,9 +770,9 @@ const TYPES = [
   { id: "paths", name: "Tangled lines", gen: genPaths },
   { id: "diff", name: "Spot the difference", gen: genDiff }
 ];
-const TOTAL = 1000;
+const TOTAL = TYPES.length * 100;
 const typeOf = n => TYPES[n % TYPES.length];
-const levelOf = n => Math.floor(n / 100) + 1;
+const levelOf = n => Math.floor(n / TYPES.length / 10) + 1;
 function build(n) {
   const r = R(n * 7919 + 101);
   const q = typeOf(n).gen(r, levelOf(n));
@@ -594,7 +781,7 @@ function build(n) {
 }
 
 /* ---------- state ---------- */
-const KEY = "mindpalace.v1";
+const KEY = "mindpalace.v2";
 let state = { a: {}, cur: 0, streak: 0 };
 try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.a) state = { a: s.a, cur: s.cur || 0, streak: s.streak || 0 }; } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
@@ -612,7 +799,7 @@ function renderCats() {
     const b = document.createElement("button");
     b.type = "button"; b.className = "chip"; b.id = "cat-" + (t.id || "all");
     b.setAttribute("aria-pressed", String(filter === t.id));
-    b.innerHTML = `${t.name} <small>${t.id ? 100 : 1000}</small>`;
+    b.innerHTML = `${t.name} <small>${t.id ? 100 : TOTAL}</small>`;
     b.onclick = () => { filter = t.id; renderCats(); renderBoardDim(); if (filter && typeOf(state.cur).id !== filter) go(nextIndex(state.cur, 1, false, true)); };
     el.appendChild(b);
   });
@@ -640,7 +827,7 @@ function renderQuestion() {
   q.options.forEach((o, i) => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "opt"; b.id = "opt-" + i;
-    b.innerHTML = `<kbd>${i + 1}</kbd>` + (typeof o === "object" ? `<span class="pic">${o.pic}</span>` : `<span class="val">${o}</span>`);
+    b.innerHTML = `<kbd>${i + 1}</kbd>` + (typeof o === "object" ? `<span class="pic">${o.pic}</span>` : `<span class="val${/[a-z]{3}/i.test(o) && !/^[A-Z]\d+$/.test(o) ? " word" : ""}">${o}</span>`);
     b.setAttribute("aria-label", `Option ${i + 1}`);
     if (ans) {
       b.disabled = true;
