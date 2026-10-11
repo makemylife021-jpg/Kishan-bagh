@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="hi-Latn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Kishan Bagh — Launch Promo</title>
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #fff6e0;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        color: #111;
+        background: #fff6e0;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 36px;
+        text-align: center;
+      }
+      .bg-cream { background: #fff6e0; }
+      .bg-green { background: #1f8a3b; }
+      .bg-yellow { background: #ffd23f; }
+      .bg-ink { background: #111; }
+
+      .box {
+        display: block;
+        border: 8px solid #111;
+        box-shadow: 18px 18px 0 #111;
+        padding: 28px 56px;
+      }
+      .tag {
+        display: block;
+        font-family: ui-monospace, "DejaVu Sans Mono", monospace;
+        font-size: 34px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        background: #111;
+        color: #ffd23f;
+        padding: 12px 28px;
+      }
+      .huge {
+        display: block;
+        font-size: 150px;
+        font-weight: 900;
+        line-height: 0.95;
+        letter-spacing: -0.04em;
+        text-transform: uppercase;
+      }
+      .big {
+        display: block;
+        font-size: 104px;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+      .mid {
+        display: block;
+        font-size: 56px;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+      .small {
+        display: block;
+        font-size: 40px;
+        font-weight: 600;
+      }
+      .white { color: #fff6e0; }
+      .yellow { color: #ffd23f; }
+      .green { color: #1f8a3b; }
+
+      /* Scene 1 */
+      #s1-line1 { width: 1500px; }
+      #s1-strike {
+        display: block;
+        width: 760px;
+        height: 18px;
+        background: #e23d28;
+      }
+
+      /* Scene 2 */
+      #s2-brand {
+        background: #ffd23f;
+        color: #111;
+        font-size: 190px;
+        padding: 20px 70px;
+      }
+
+      /* Features */
+      .feature-num {
+        display: block;
+        font-family: ui-monospace, "DejaVu Sans Mono", monospace;
+        font-size: 44px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+      }
+      .feature-card {
+        display: block;
+        background: #fff6e0;
+        width: 1400px;
+      }
+      .feature-card .big { color: #111; }
+      .feature-card .mid { color: #1f8a3b; margin-top: 18px; }
+
+      /* Offer */
+      #s5-pct {
+        display: block;
+        font-size: 300px;
+        font-weight: 900;
+        line-height: 0.9;
+        letter-spacing: -0.05em;
+        color: #e23d28;
+      }
+      #s5-card { background: #fff6e0; }
+
+      /* CTA */
+      #s6-btn {
+        background: #1f8a3b;
+        color: #fff6e0;
+        font-size: 64px;
+        font-weight: 900;
+        border-color: #fff6e0;
+        box-shadow: 14px 14px 0 #ffd23f;
+      }
+      #s6-sign { letter-spacing: 0.08em; }
+
+      .leaf {
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        border: 8px solid #111;
+        background: #4fc26a;
+        border-radius: 0 60% 0 60%;
+      }
+      #leaf-a { top: 80px; left: 110px; }
+      #leaf-b { bottom: 90px; right: 130px; background: #ffd23f; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="33"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- 1. Hook -->
+      <section id="s1" class="clip bg-cream" data-start="0" data-duration="4" data-track-index="0">
+        <span id="s1-tag" class="tag">Sach batao…</span>
+        <span id="s1-line1" class="big">Market ki baasi sabzi se pareshaan?</span>
+        <span id="s1-strike"></span>
+      </section>
+
+      <!-- 2. Reveal -->
+      <section id="s2" class="clip bg-green" data-start="4" data-duration="5" data-track-index="0">
+        <div id="leaf-a" class="leaf"></div>
+        <div id="leaf-b" class="leaf"></div>
+        <span id="s2-intro" class="tag">Introducing</span>
+        <span id="s2-brand" class="huge box">Kishan Bagh</span>
+        <span id="s2-tagline" class="mid white">Kisaan ke bagh se, seedha aapke ghar tak.</span>
+      </section>
+
+      <!-- 3. Features -->
+      <section id="f1" class="clip bg-yellow" data-start="9" data-duration="3" data-track-index="0">
+        <span id="f1-num" class="feature-num">01 / 04</span>
+        <div id="f1-card" class="feature-card box">
+          <span class="big">100% Farm Fresh</span>
+          <span class="mid">Subah toda, shaam ko aapki plate mein.</span>
+        </div>
+      </section>
+      <section id="f2" class="clip bg-green" data-start="12" data-duration="3" data-track-index="0">
+        <span id="f2-num" class="feature-num white">02 / 04</span>
+        <div id="f2-card" class="feature-card box">
+          <span class="big">No Middleman</span>
+          <span class="mid">Kisaan ko milega poora daam.</span>
+        </div>
+      </section>
+      <section id="f3" class="clip bg-yellow" data-start="15" data-duration="3" data-track-index="0">
+        <span id="f3-num" class="feature-num">03 / 04</span>
+        <div id="f3-card" class="feature-card box">
+          <span class="big">Same-day Delivery</span>
+          <span class="mid">Order aaj, taazgi aaj hi.</span>
+        </div>
+      </section>
+      <section id="f4" class="clip bg-green" data-start="18" data-duration="3" data-track-index="0">
+        <span id="f4-num" class="feature-num white">04 / 04</span>
+        <div id="f4-card" class="feature-card box">
+          <span class="big">Chemical-free Options</span>
+          <span class="mid">Family ke liye safe aur healthy.</span>
+        </div>
+      </section>
+
+      <!-- 4. Emotion -->
+      <section id="s4" class="clip bg-ink" data-start="21" data-duration="4" data-track-index="0">
+        <span id="s4-a" class="big white">Taazgi jo aap</span>
+        <span id="s4-b" class="huge yellow">taste kar sakte ho.</span>
+      </section>
+
+      <!-- 5. Offer -->
+      <section id="s5" class="clip bg-yellow" data-start="25" data-duration="4" data-track-index="0">
+        <span id="s5-tag" class="tag">Launch Offer</span>
+        <div id="s5-card" class="box">
+          <span id="s5-pct">20% OFF</span>
+          <span class="mid">Pehle order par</span>
+        </div>
+      </section>
+
+      <!-- 6. CTA -->
+      <section id="s6" class="clip bg-green" data-start="29" data-duration="4" data-track-index="0">
+        <span id="s6-title" class="huge white">Order karo aaj hi!</span>
+        <span id="s6-btn" class="box">KISHAN BAGH</span>
+        <span id="s6-sign" class="small yellow">Taaza. Seedha. Sachcha.</span>
+      </section>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const pop = { ease: "back.out(1.8)", duration: 0.55 };
+      const rise = { ease: "power3.out", duration: 0.6 };
+
+      // 1. Hook
+      tl.fromTo("#s1-tag", { opacity: 0, y: 30 }, { opacity: 1, y: 0, ...rise }, 0.2);
+      tl.fromTo("#s1-line1", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, ...pop }, 0.5);
+      tl.fromTo("#s1-strike", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power2.inOut" }, 2.4);
+      tl.to("#s1-line1", { opacity: 0.35, duration: 0.3 }, 2.6);
+
+      // 2. Reveal
+      tl.fromTo("#s2-intro", { opacity: 0, y: -30 }, { opacity: 1, y: 0, ...rise }, 4.2);
+      tl.fromTo("#s2-brand", { opacity: 0, scale: 0.4, rotation: -6 }, { opacity: 1, scale: 1, rotation: -2, ease: "back.out(2)", duration: 0.7 }, 4.5);
+      tl.fromTo("#s2-tagline", { opacity: 0, y: 40 }, { opacity: 1, y: 0, ...rise }, 5.4);
+      tl.fromTo("#leaf-a", { opacity: 0, rotation: -90, scale: 0.2 }, { opacity: 1, rotation: 0, scale: 1, ...pop }, 4.6);
+      tl.fromTo("#leaf-b", { opacity: 0, rotation: 90, scale: 0.2 }, { opacity: 1, rotation: 0, scale: 1, ...pop }, 4.8);
+      tl.to("#leaf-a", { rotation: 12, duration: 2.5, ease: "sine.inOut" }, 5.3);
+      tl.to("#leaf-b", { rotation: -12, duration: 2.5, ease: "sine.inOut" }, 5.3);
+
+      // 3. Features
+      [
+        ["#f1", 9, -60],
+        ["#f2", 12, 60],
+        ["#f3", 15, -60],
+        ["#f4", 18, 60],
+      ].forEach(([id, t, dx]) => {
+        tl.fromTo(id + "-num", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, t + 0.1);
+        tl.fromTo(id + "-card", { opacity: 0, x: dx * 6, rotation: dx > 0 ? 4 : -4 }, { opacity: 1, x: 0, rotation: dx > 0 ? 1 : -1, ease: "back.out(1.4)", duration: 0.6 }, t + 0.2);
+      });
+
+      // 4. Emotion
+      tl.fromTo("#s4-a", { opacity: 0, y: 40 }, { opacity: 1, y: 0, ...rise }, 21.3);
+      tl.fromTo("#s4-b", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, ...pop }, 21.9);
+
+      // 5. Offer
+      tl.fromTo("#s5-tag", { opacity: 0, y: -30 }, { opacity: 1, y: 0, ...rise }, 25.2);
+      tl.fromTo("#s5-card", { opacity: 0, scale: 0.3, rotation: 8 }, { opacity: 1, scale: 1, rotation: -2, ease: "back.out(2.2)", duration: 0.7 }, 25.5);
+      tl.to("#s5-pct", { scale: 1.06, duration: 0.35, yoyo: true, repeat: 3, ease: "sine.inOut" }, 26.6);
+
+      // 6. CTA
+      tl.fromTo("#s6-title", { opacity: 0, y: 50 }, { opacity: 1, y: 0, ...rise }, 29.2);
+      tl.fromTo("#s6-btn", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, ...pop }, 29.8);
+      tl.fromTo("#s6-sign", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 30.5);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
