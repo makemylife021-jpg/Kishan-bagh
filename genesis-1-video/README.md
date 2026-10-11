@@ -2,6 +2,8 @@
 
 `genesis-chapter-1.mp4` — 1280×720, ~1:53, Hindi captions, ambient music.
 
+`genesis-chapter-1-summary.mp4` — ~54s short summary cut (one line per day). Render with `node render.js 30 --summary`.
+
 Scenes: शीर्षक → आरंभ (अंधकार और जल) → दिन 1 उजियाला → दिन 2 आकाश → दिन 3 भूमि व पेड़-पौधे →
 दिन 4 सूरज-चाँद-तारे → दिन 5 मछलियाँ व पक्षी → दिन 6 पशु व मनुष्य → सार (1:31) → सीख.
 

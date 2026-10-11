@@ -24,6 +24,7 @@
 <span class="preload" style="font-family:Baloo;font-weight:600">दिन abc</span>
 <script>
 const W = 1280, H = 720;
+const SUMMARY = location.search.includes('summary');
 const cv = document.getElementById('c');
 const ctx = cv.getContext('2d');
 
@@ -360,7 +361,7 @@ const scenes = [
       petals(t, 24, 3);
       const a = seg(t, 0.6, 2.0);
       bigText('उत्पत्ति — अध्याय 1', W / 2, 250 - (1 - a) * 20, 84, '#fffaf0', a);
-      bigText('सृष्टि की कहानी · एक एनिमेटेड व्याख्या', W / 2, 340, 38, '#fff3dc', seg(t, 1.6, 3.0), 'Tiro', '400');
+      bigText(SUMMARY ? 'सृष्टि के 6 दिन · एक मिनट में सार' : 'सृष्टि की कहानी · एक एनिमेटेड व्याख्या', W / 2, 340, 38, '#fff3dc', seg(t, 1.6, 3.0), 'Tiro', '400');
     } },
 
   { dur: 12, label: 'आरंभ',
@@ -555,6 +556,22 @@ const scenes = [
     } },
 ];
 
+// Summary cut: shorter scenes, one line each; animations are time-scaled to fit.
+if (SUMMARY) {
+  const cut = [
+    [4, []],
+    [5, ['आरंभ में सब ओर अंधकार और गहरा जल था — परमेश्वर का आत्मा जल पर मंडराता था।']],
+    [5, ['परमेश्वर ने कहा “उजियाला हो” — दिन और रात अलग हुए।']],
+    [4.5, ['ऊपर और नीचे का जल अलग हुआ — बीच में आकाश बना।']],
+    [6, ['सूखी भूमि और समुद्र बने, फिर घास, पौधे और पेड़ उगे।']],
+    [6, ['दिन के लिए सूरज, रात के लिए चाँद और तारे — समय और ऋतुओं के चिह्न।']],
+    [5, ['समुद्र में मछलियाँ और आकाश में पक्षी भर गए।']],
+    [7, ['भूमि पर पशु बने, और परमेश्वर ने मनुष्य को अपने स्वरूप में बनाया।']],
+    [6, ['परमेश्वर ने सब कुछ देखा — “वह बहुत ही अच्छा था।” (1:31)']],
+    [5, []],
+  ];
+  scenes.forEach((sc, i) => { sc.k = sc.dur / cut[i][0]; sc.dur = cut[i][0]; sc.caps = cut[i][1]; });
+}
 let starts = [], acc = 0;
 for (const s of scenes) { starts.push(acc); acc += s.dur; }
 const TOTAL = acc;
@@ -569,7 +586,7 @@ function renderAt(T) {
   let i = scenes.length - 1;
   for (let k = 0; k < scenes.length; k++) if (T < starts[k] + scenes[k].dur) { i = k; break; }
   const s = scenes[i], t = T - starts[i];
-  ctx.save(); s.draw(t); ctx.restore();
+  ctx.save(); s.draw(t * (s.k || 1)); ctx.restore();
   ctx.textAlign = 'left';
   // captions spread evenly
   if (s.caps.length) {

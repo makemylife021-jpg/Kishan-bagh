@@ -6,12 +6,13 @@ const path = require('path');
 
 const FPS = Number(process.argv[2]) || 30;
 const PREVIEW = process.argv.includes('--preview');
+const SUMMARY = process.argv.includes('--summary');
 const dir = __dirname;
 
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
-  await page.goto('file://' + path.join(dir, 'scene.html'));
+  await page.goto('file://' + path.join(dir, 'scene.html') + (SUMMARY ? '?summary' : ''));
   await page.evaluate(() => window.ready);
   const total = await page.evaluate(() => window.TOTAL);
   const canvas = await page.$('#c');
@@ -19,7 +20,7 @@ const dir = __dirname;
   if (PREVIEW) {
     for (const t of (process.env.TS || '3,10,17,30,45,55,70,85,100,108').split(',').map(Number)) {
       await page.evaluate(t => window.renderAt(t), t);
-      await canvas.screenshot({ path: path.join(dir, `preview-${t}.png`) });
+      await canvas.screenshot({ path: path.join(dir, `preview-${SUMMARY ? 's' : ''}${t}.png`) });
     }
     await browser.close();
     return;
@@ -51,7 +52,7 @@ const dir = __dirname;
   ].join('+');
   execFileSync('ffmpeg', ['-y', '-i', silent, '-f', 'lavfi', '-i', `aevalsrc=${expr}:s=44100:d=${d}`,
     '-af', `lowpass=f=1800,aecho=0.8:0.7:60:0.3,afade=t=in:d=2,afade=t=out:st=${(total - 3).toFixed(2)}:d=3`,
-    '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-shortest', path.join(dir, 'genesis-chapter-1.mp4')], { stdio: 'inherit' });
+    '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-shortest', path.join(dir, SUMMARY ? 'genesis-chapter-1-summary.mp4' : 'genesis-chapter-1.mp4')], { stdio: 'inherit' });
   require('fs').unlinkSync(silent);
   console.log('done');
 })();
