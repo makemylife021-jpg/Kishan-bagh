@@ -1,0 +1,431 @@
+<title>Kishan Bagh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hind:wght@400;500;600&family=DM+Mono:wght@500&display=swap">
+<style>
+  /* Layout: brutalist mandi stall — thick ink borders, hard shadows, a price-board grid and a stamped order slip. */
+  :root {
+    --bg: #fff6e0;
+    --surface: #fffdf6;
+    --ink: #15160f;
+    --muted: #4c4e3f;
+    --leaf: #1f8a3b;
+    --leaf-ink: #fff6e0;
+    --sun: #ffd23f;
+    --chili: #d93a24;
+    --shadow: #15160f;
+    --font-display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+    --font-body: "Hind", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", monospace;
+    --border: 4px solid var(--ink);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12140e; --surface: #1c1f16; --ink: #f3ecd6; --muted: #bdb8a3;
+      --leaf: #3fb35e; --leaf-ink: #0e110b; --sun: #ffd23f; --chili: #ff6a4f; --shadow: #000;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12140e; --surface: #1c1f16; --ink: #f3ecd6; --muted: #bdb8a3;
+    --leaf: #3fb35e; --leaf-ink: #0e110b; --sun: #ffd23f; --chili: #ff6a4f; --shadow: #000;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; }
+  h1, h2, h3 { font-family: var(--font-display); line-height: 1.02; margin: 0; text-wrap: balance; letter-spacing: -0.02em; }
+  p { margin: 0; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--chili); outline-offset: 3px; }
+
+  .stamp {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 6px 12px;
+  }
+  .btn {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.1rem;
+    text-decoration: none;
+    border: var(--border);
+    background: var(--leaf);
+    color: var(--leaf-ink);
+    padding: 12px 22px;
+    box-shadow: 6px 6px 0 var(--shadow);
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--shadow); }
+  .btn:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 var(--shadow); }
+  .btn.alt { background: var(--sun); color: #15160f; }
+
+  /* Header */
+  header {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: var(--bg);
+    border-bottom: var(--border);
+  }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; flex-wrap: wrap; }
+  .logo { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+  .logo-leaf { width: 26px; height: 26px; background: var(--leaf); border: 3px solid var(--ink); border-radius: 0 60% 0 60%; }
+  nav { display: flex; gap: 18px; flex-wrap: wrap; font-weight: 600; }
+  nav a { text-decoration: none; }
+  nav a:hover { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 4px; }
+
+  /* Hero */
+  .hero { padding-block: 56px 64px; display: grid; grid-template-columns: 1.25fr 1fr; gap: 48px; align-items: center; }
+  .hero > * { min-width: 0; }
+  .hero h1 { font-size: clamp(2.6rem, 6.5vw, 5rem); font-weight: 800; margin-block: 18px 20px; }
+  .hero h1 .hl { background: var(--sun); color: #15160f; padding: 0 10px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .hero p.lede { font-size: 1.25rem; color: var(--muted); max-width: 34ch; }
+  .hero .ctas { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 28px; }
+  .crate {
+    border: var(--border);
+    background: var(--leaf);
+    box-shadow: 12px 12px 0 var(--shadow);
+    padding: 22px;
+    transform: rotate(1.5deg);
+    max-width: 100%;
+  }
+  .crate canvas { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; max-width: 100%; background: var(--surface); border: 3px solid var(--ink); }
+  .crate-label { margin-top: 14px; display: flex; justify-content: space-between; gap: 12px; font-family: var(--font-mono); color: var(--leaf-ink); font-size: .85rem; flex-wrap: wrap; }
+
+  section { padding-block: 64px; }
+  .sec-head { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; max-width: 60ch; }
+  .sec-head h2 { font-size: clamp(2rem, 4.5vw, 3.1rem); font-weight: 800; }
+  .sec-head p { color: var(--muted); }
+
+  /* Promise strip */
+  .strip { background: var(--ink); color: var(--bg); padding-block: 18px; overflow: hidden; }
+  .strip-row { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; }
+  .strip-row span::before { content: "✦ "; color: var(--sun); }
+
+  /* Features */
+  .features { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+  .feature { border: var(--border); background: var(--surface); padding: 22px; box-shadow: 6px 6px 0 var(--shadow); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .feature:nth-child(even) { background: var(--sun); color: #15160f; }
+  .feature:nth-child(even) p { color: #3b3b2e; }
+  .feature h3 { font-size: 1.45rem; font-weight: 800; }
+  .feature p { color: var(--muted); }
+  .feature .fig { font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; }
+
+  /* Price board */
+  .board { border: var(--border); background: var(--surface); box-shadow: 10px 10px 0 var(--shadow); }
+  .board-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 20px; border-bottom: var(--border); background: var(--leaf); color: var(--leaf-ink); }
+  .board-top strong { font-family: var(--font-display); font-size: 1.35rem; }
+  .board-top small { font-family: var(--font-mono); font-size: .8rem; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 2px dashed var(--muted); }
+  .chip { font: 600 .95rem var(--font-body); border: 3px solid var(--ink); background: var(--bg); color: var(--ink); padding: 4px 14px; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 520px; }
+  th, td { text-align: left; padding: 12px 20px; border-bottom: 2px solid color-mix(in srgb, var(--ink) 15%, transparent); }
+  th { font-family: var(--font-mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 500; }
+  td.num { text-align: right; font-family: var(--font-mono); }
+  th.num { text-align: right; }
+  .farm { color: var(--muted); font-size: .95rem; }
+  .save { color: var(--leaf); font-weight: 600; }
+  .add { font: 700 .9rem var(--font-body); border: 3px solid var(--ink); background: var(--sun); color: #15160f; padding: 4px 12px; cursor: pointer; }
+  .add.added { background: var(--leaf); color: var(--leaf-ink); }
+  .board-note { padding: 14px 20px; font-size: .9rem; color: var(--muted); border-top: 2px dashed var(--muted); }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: var(--border); background: var(--surface); }
+  .step { padding: 26px; border-right: var(--border); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .step:last-child { border-right: 0; }
+  .step .time { font-family: var(--font-mono); font-size: 1.6rem; color: var(--leaf); }
+  .step h3 { font-size: 1.4rem; font-weight: 800; }
+  .step p { color: var(--muted); }
+
+  /* Offer + order */
+  .order { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; align-items: start; }
+  .order > * { min-width: 0; }
+  .offer { border: var(--border); background: var(--sun); color: #15160f; padding: 28px; box-shadow: 10px 10px 0 var(--shadow); transform: rotate(-1.5deg); }
+  .offer .pct { font-family: var(--font-display); font-weight: 800; font-size: clamp(4rem, 12vw, 7rem); line-height: .9; color: #c4311c; letter-spacing: -0.04em; }
+  .offer h3 { font-size: 1.6rem; margin-block: 8px 10px; }
+  .offer p { color: #3b3b2e; }
+  .code { display: inline-flex; align-items: center; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .code b { font-family: var(--font-mono); font-size: 1.2rem; border: 3px dashed #15160f; padding: 4px 12px; background: #fff6e0; }
+  .code button { font: 700 .9rem var(--font-body); border: 3px solid #15160f; background: #15160f; color: #ffd23f; padding: 6px 12px; cursor: pointer; }
+
+  form.slip { border: var(--border); background: var(--surface); padding: 26px; box-shadow: 10px 10px 0 var(--shadow); display: grid; gap: 16px; }
+  .slip h3 { font-size: 1.6rem; font-weight: 800; }
+  .field { display: grid; gap: 6px; }
+  .field label { font-weight: 600; }
+  .field input, .field select, .field textarea {
+    font: 1rem var(--font-body); color: var(--ink); background: var(--bg);
+    border: 3px solid var(--ink); padding: 10px 12px; width: 100%;
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .row2 > * { min-width: 0; }
+  .basket { font-family: var(--font-mono); font-size: .9rem; background: var(--bg); border: 2px dashed var(--muted); padding: 10px 12px; min-height: 44px; }
+  .confirm { border: 3px solid var(--leaf); background: color-mix(in srgb, var(--leaf) 14%, var(--surface)); padding: 14px; font-weight: 500; }
+  .err { color: var(--chili); font-weight: 600; font-size: .95rem; }
+
+  footer { border-top: var(--border); padding-block: 32px; margin-top: 40px; }
+  .foot { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: center; }
+  .foot .sign { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; }
+  .foot small { color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .hero, .order { grid-template-columns: 1fr; }
+    .features { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    .step { border-right: 0; border-bottom: var(--border); }
+    .step:last-child { border-bottom: 0; }
+    .crate { max-width: 440px; }
+  }
+  @media (max-width: 520px) {
+    .features, .row2 { grid-template-columns: 1fr; }
+    nav { display: none; }
+    section { padding-block: 44px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<header>
+  <div class="wrap bar">
+    <a class="logo" href="#top"><span class="logo-leaf" aria-hidden="true"></span>Kishan Bagh</a>
+    <nav aria-label="Main">
+      <a href="#kyun">Kyun hum?</a>
+      <a href="#daam">Aaj ke daam</a>
+      <a href="#kaise">Kaise kaam karta hai</a>
+      <a href="#order">Order</a>
+    </nav>
+    <a class="btn alt" href="#order">Order karo</a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <div>
+      <span class="stamp">Launch offer · 20% off</span>
+      <h1>Kisaan ke bagh se, <span class="hl">seedha aapke ghar tak.</span></h1>
+      <p class="lede">Market ki baasi sabzi ko bolo bye. Subah khet se toda gaya, usi din aapke darwaze par. Beech mein koi middleman nahi.</p>
+      <div class="ctas">
+        <a class="btn" href="#order">Pehla order karo</a>
+        <a class="btn alt" href="#daam">Aaj ke daam dekho</a>
+      </div>
+    </div>
+    <div class="crate">
+      <canvas id="crate" width="600" height="600" aria-label="Taaze phal aur sabziyon ka crate"></canvas>
+      <div class="crate-label"><span>CRATE #0417 · NASHIK → GHAR</span><span>Toda: 6:10 AM</span></div>
+    </div>
+  </div>
+
+  <div class="strip" aria-hidden="true">
+    <div class="wrap strip-row"><span>Taaza</span><span>Seedha</span><span>Sachcha</span><span>Same-day delivery</span></div>
+  </div>
+
+  <section id="kyun">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="stamp">Kyun Kishan Bagh?</span>
+        <h2>Taazgi jo aap taste kar sakte ho.</h2>
+        <p>Har crate ek kisaan ke naam se aata hai. Aapko pata hai sabzi kahan se aayi, aur kisaan ko pata hai uska poora daam mila.</p>
+      </div>
+      <div class="features">
+        <article class="feature"><span class="fig">Khet se 12 ghante</span><h3>100% Farm Fresh</h3><p>Subah toda, shaam ko aapki plate mein. Cold storage ka koi chakkar nahi.</p></article>
+        <article class="feature"><span class="fig">0 middleman</span><h3>Kisaan ko poora daam</h3><p>Paisa seedha kisaan ke khaate mein. Aap bhi market se kam daam dete ho.</p></article>
+        <article class="feature"><span class="fig">Same-day</span><h3>Aaj order, aaj delivery</h3><p>Dopahar 12 baje tak order karo, shaam 7 baje tak ghar par.</p></article>
+        <article class="feature"><span class="fig">Label par likha</span><h3>Chemical-free options</h3><p>Organic aur residue-free sabziyon par saaf label, taaki family ke liye sahi chuno.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="daam">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="stamp">Mandi board</span>
+        <h2>Aaj ke daam</h2>
+        <p>Basket mein daalo, neeche order slip mein apne aap jud jayega.</p>
+      </div>
+      <div class="board">
+        <div class="board-top"><strong>Kishan Bagh Rate Card</strong><small>₹ per kg · sample rates</small></div>
+        <div class="filters" role="group" aria-label="Filter">
+          <button class="chip" type="button" data-f="all" aria-pressed="true">Sab</button>
+          <button class="chip" type="button" data-f="sabzi" aria-pressed="false">Sabzi</button>
+          <button class="chip" type="button" data-f="phal" aria-pressed="false">Phal</button>
+          <button class="chip" type="button" data-f="organic" aria-pressed="false">Chemical-free</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Item</th><th>Kisaan / Bagh</th><th class="num">Market</th><th class="num">Kishan Bagh</th><th></th></tr></thead>
+            <tbody id="rates"></tbody>
+          </table>
+        </div>
+        <p class="board-note">Ye daam aur kisaanon ke naam sirf example hain, demo ke liye. Asli rate roz subah mandi ke hisaab se update honge.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="kaise">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="stamp">Ek din ka safar</span>
+        <h2>Khet se ghar tak, ek hi din mein</h2>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="time">06:00</span><h3>Bagh mein todai</h3><p>Aapke order ke hisaab se kisaan subah taaza todte hain. Pehle se stock nahi rakhte.</p></div>
+        <div class="step"><span class="time">11:00</span><h3>Chhatai aur packing</h3><p>Har item haath se check hota hai, phir kisaan ke naam wale crate mein pack hota hai.</p></div>
+        <div class="step"><span class="time">19:00</span><h3>Aapke darwaze par</h3><p>Shaam tak delivery. Kuch kharab nikle to agle order mein poora refund.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="order">
+    <div class="wrap order">
+      <div class="offer">
+        <span class="stamp">Launch offer</span>
+        <div class="pct">20% OFF</div>
+        <h3>Pehle order par</h3>
+        <p>Minimum order ₹299. Offer sirf launch ke mahine tak.</p>
+        <div class="code"><b id="code">PEHLABAGH20</b><button type="button" id="copy">Code copy karo</button></div>
+      </div>
+
+      <form class="slip" id="slip" novalidate>
+        <h3>Order slip</h3>
+        <div class="field">
+          <span id="basket-label"><b>Aapki basket</b></span>
+          <div class="basket" id="basket" aria-labelledby="basket-label">Abhi khaali hai. Upar "Aaj ke daam" se item jodo.</div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="name">Naam</label><input id="name" name="name" autocomplete="name" placeholder="Jaise: Priya Sharma"></div>
+          <div class="field"><label for="phone">Mobile number</label><input id="phone" name="phone" inputmode="numeric" autocomplete="tel" placeholder="10 digit"></div>
+        </div>
+        <div class="field"><label for="addr">Delivery address</label><textarea id="addr" name="addr" rows="2" autocomplete="street-address" placeholder="Ghar no., gali, area, pincode"></textarea></div>
+        <div class="row2">
+          <div class="field"><label for="slot">Delivery slot</label>
+            <select id="slot" name="slot"><option>Aaj shaam 5–7 PM</option><option>Kal subah 8–10 AM</option><option>Kal shaam 5–7 PM</option></select>
+          </div>
+          <div class="field"><label for="promo">Promo code</label><input id="promo" name="promo" placeholder="PEHLABAGH20"></div>
+        </div>
+        <p class="err" id="err" hidden></p>
+        <button class="btn" type="submit">Order confirm karo</button>
+        <div class="confirm" id="ok" hidden></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="sign">Kishan Bagh · Taaza. Seedha. Sachcha.</span>
+    <small>Ye website ka demo version hai. Payment aur asli order system abhi joda jana baaki hai.</small>
+  </div>
+</footer>
+
+<script>
+  const items = [
+    { name: "Tamatar", farm: "Ramesh ji, Nashik", type: "sabzi", market: 40, ours: 32, organic: false },
+    { name: "Bhindi", farm: "Sunita Devi, Lasalgaon", type: "sabzi", market: 60, ours: 48, organic: true },
+    { name: "Palak (gaddi)", farm: "Harpal Singh, Ludhiana", type: "sabzi", market: 30, ours: 22, organic: true },
+    { name: "Aloo", farm: "Mahesh Patel, Deesa", type: "sabzi", market: 35, ours: 28, organic: false },
+    { name: "Kela (darjan)", farm: "Anil Pawar, Jalgaon", type: "phal", market: 60, ours: 48, organic: false },
+    { name: "Aam Kesar", farm: "Kantibhai, Junagadh", type: "phal", market: 180, ours: 145, organic: true },
+    { name: "Papita", farm: "Lakshmi Bai, Anand", type: "phal", market: 50, ours: 38, organic: true },
+  ];
+  const basket = new Map();
+  const tbody = document.getElementById("rates");
+  let filter = "all";
+
+  function render() {
+    tbody.innerHTML = "";
+    items.filter(i => filter === "all" || (filter === "organic" ? i.organic : i.type === filter)).forEach(i => {
+      const tr = document.createElement("tr");
+      const save = Math.round((1 - i.ours / i.market) * 100);
+      const inB = basket.has(i.name);
+      tr.innerHTML = `<td><b>${i.name}</b>${i.organic ? ' <span class="save">· chemical-free</span>' : ""}</td>
+        <td class="farm">${i.farm}</td>
+        <td class="num"><s>₹${i.market}</s></td>
+        <td class="num"><b>₹${i.ours}</b> <span class="save">−${save}%</span></td>
+        <td><button type="button" class="add${inB ? " added" : ""}">${inB ? "Basket mein ✓" : "+ Jodo"}</button></td>`;
+      tr.querySelector("button").addEventListener("click", () => {
+        basket.has(i.name) ? basket.delete(i.name) : basket.set(i.name, i);
+        render(); renderBasket();
+      });
+      tbody.appendChild(tr);
+    });
+  }
+  function renderBasket() {
+    const el = document.getElementById("basket");
+    if (!basket.size) { el.textContent = 'Abhi khaali hai. Upar "Aaj ke daam" se item jodo.'; return; }
+    const list = [...basket.values()];
+    const total = list.reduce((s, i) => s + i.ours, 0);
+    el.textContent = list.map(i => `${i.name} 1kg ₹${i.ours}`).join(" · ") + `  =  ₹${total}`;
+  }
+  document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
+    filter = c.dataset.f;
+    document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x === c)));
+    render();
+  }));
+  render();
+
+  document.getElementById("copy").addEventListener("click", async (e) => {
+    const btn = e.currentTarget;
+    try { await navigator.clipboard.writeText("PEHLABAGH20"); btn.textContent = "Copied!"; }
+    catch { const r = document.createRange(); r.selectNodeContents(document.getElementById("code")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Select ho gaya, copy karo"; }
+  });
+
+  document.getElementById("slip").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const err = document.getElementById("err"), ok = document.getElementById("ok");
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.replace(/\D/g, "");
+    const addr = document.getElementById("addr").value.trim();
+    ok.hidden = true;
+    let msg = "";
+    if (!basket.size) msg = "Basket khaali hai. Aaj ke daam se kam se kam ek item jodo.";
+    else if (!name) msg = "Apna naam likho.";
+    else if (phone.length !== 10) msg = "Mobile number 10 digit ka hona chahiye.";
+    else if (!addr) msg = "Delivery address likho.";
+    err.hidden = !msg; err.textContent = msg;
+    if (msg) return;
+    let total = [...basket.values()].reduce((s, i) => s + i.ours, 0);
+    const promo = document.getElementById("promo").value.trim().toUpperCase();
+    let note = "";
+    if (promo === "PEHLABAGH20") {
+      if (total >= 299) { const off = Math.round(total * 0.2); total -= off; note = ` (₹${off} launch discount laga)`; }
+      else note = " (promo ke liye minimum ₹299 chahiye)";
+    }
+    ok.hidden = false;
+    ok.textContent = `Shukriya ${name}! Demo order taiyaar: ₹${total}${note}, slot ${document.getElementById("slot").value}. Ye demo hai, asli order abhi nahi bheja gaya.`;
+  });
+
+  // Hero crate illustration
+  (function drawCrate() {
+    const cv = document.getElementById("crate"), ctx = cv.getContext("2d");
+    const ink = getComputedStyle(document.documentElement).getPropertyValue("--ink").trim() || "#15160f";
+    const fruits = [
+      [150, 170, 95, "#d93a24"], [330, 150, 85, "#ffd23f"], [480, 210, 80, "#3fb35e"],
+      [210, 360, 100, "#f08a24"], [420, 390, 105, "#d93a24"], [120, 500, 70, "#7a3fb3"],
+      [300, 520, 80, "#3fb35e"], [500, 520, 65, "#ffd23f"],
+    ];
+    ctx.lineWidth = 8; ctx.strokeStyle = ink;
+    fruits.forEach(([x, y, r, c]) => {
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = c; ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, y - r); ctx.lineTo(x + 6, y - r - 26); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(x + 28, y - r - 14, 24, 11, -0.5, 0, Math.PI * 2); ctx.fillStyle = "#1f8a3b"; ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x - r * 0.35, y - r * 0.35, r * 0.18, 0, Math.PI * 2); ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.fill();
+    });
+  })();
+</script>
