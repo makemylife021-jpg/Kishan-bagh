@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<title>Genesis 1 Animation</title>
+<style>
+  @font-face { font-family: 'Tiro'; src: url(fonts/tiro.woff2) format('woff2');
+    unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FF; }
+  @font-face { font-family: 'Tiro'; src: url(fonts/tiro-latin.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2122, U+2212, U+2215; }
+  @font-face { font-family: 'Baloo'; font-weight: 600; src: url(fonts/baloo.woff2) format('woff2');
+    unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FF; }
+  @font-face { font-family: 'Baloo'; font-weight: 600; src: url(fonts/baloo-latin.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2122, U+2212, U+2215; }
+  html, body { margin: 0; background: #000; }
+  canvas { display: block; }
+  /* force font loading */
+  .preload { position: absolute; opacity: 0; font-size: 10px; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<span class="preload" style="font-family:Tiro">आरंभ abc</span>
+<span class="preload" style="font-family:Baloo;font-weight:600">दिन abc</span>
+<script>
+const W = 1280, H = 720;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+
+// ---------- utils ----------
+function rng(seed) { let s = seed % 2147483647; if (s <= 0) s += 2147483646;
+  return () => (s = (s * 16807) % 2147483647, (s - 1) / 2147483646); }
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => { x = clamp(x); return x * x * (3 - 2 * x); };
+const lerp = (a, b, t) => a + (b - a) * t;
+const seg = (t, a, b) => ease((t - a) / (b - a));
+function hex(c) { const n = parseInt(c.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+function mix(c1, c2, t) { const a = hex(c1), b = hex(c2);
+  return 'rgb(' + a.map((v, i) => Math.round(lerp(v, b[i], clamp(t)))).join(',') + ')'; }
+function rgba(c, a) { const [r, g, b] = hex(c); return `rgba(${r},${g},${b},${a})`; }
+function circle(x, y, r) { ctx.beginPath(); ctx.arc(x, y, Math.max(0, r), 0, Math.PI * 2); ctx.fill(); }
+
+// ---------- painterly elements ----------
+function sky(stops) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  stops.forEach(([o, c]) => g.addColorStop(o, c));
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+
+const cloudCache = {};
+function cloudPuffs(seed) {
+  if (cloudCache[seed]) return cloudCache[seed];
+  const r = rng(seed * 97 + 13), n = 7 + Math.floor(r() * 5), p = [];
+  for (let i = 0; i < n; i++) {
+    const u = i / (n - 1) - 0.5, h = Math.cos(u * Math.PI);
+    p.push([u * 240 + (r() - 0.5) * 24, -h * 60 * (0.6 + r() * 0.7), 30 + h * 46 + r() * 14]);
+  }
+  // a few towering top puffs (cumulus)
+  for (let i = 0; i < 3; i++) p.push([(r() - 0.5) * 120, -70 - r() * 50, 34 + r() * 22]);
+  return cloudCache[seed] = p;
+}
+function cloud(x, y, s, seed, alpha = 1, pal = {}) {
+  const p = cloudPuffs(seed);
+  const shadow = pal.shadow || '#b8bde3', body = pal.body || '#f4f3fb', hi = pal.hi || '#ffffff';
+  ctx.save(); ctx.globalAlpha = alpha; ctx.translate(x, y); ctx.scale(s, s);
+  ctx.beginPath(); ctx.rect(-500, -500, 1000, 506); ctx.clip(); // flat bottom
+  ctx.fillStyle = shadow; for (const q of p) circle(q[0], q[1] + 6, q[2]);
+  ctx.fillStyle = body; for (const q of p) circle(q[0] - 7, q[1] - 9, q[2] * 0.9);
+  ctx.fillStyle = hi; for (const q of p) if (q[1] < -20) circle(q[0] - 13, q[1] - 17, q[2] * 0.55);
+  ctx.restore();
+}
+function cloudField(t, seed, n, yMin, yMax, alpha = 1, pal) {
+  const r = rng(seed);
+  for (let i = 0; i < n; i++) {
+    const s = 0.45 + r() * 0.7, sp = 6 + r() * 10, y = yMin + r() * (yMax - yMin);
+    const x = ((r() * (W + 600) + t * sp) % (W + 600)) - 300;
+    cloud(x, y, s, seed + i, alpha, pal);
+  }
+}
+
+function hillY(x, base, amp, seed) {
+  return base - amp * (0.6 * Math.sin(x * 0.0038 + seed) + 0.3 * Math.sin(x * 0.011 + seed * 2.3) + 0.1 * Math.sin(x * 0.029 + seed * 5.1));
+}
+function hill(base, amp, seed, c1, c2, off = 0) {
+  ctx.beginPath(); ctx.moveTo(0, H);
+  for (let x = 0; x <= W; x += 8) ctx.lineTo(x, hillY(x, base, amp, seed) + off);
+  ctx.lineTo(W, H); ctx.closePath();
+  const g = ctx.createLinearGradient(0, base - amp, 0, H);
+  g.addColorStop(0, c1); g.addColorStop(1, c2); ctx.fillStyle = g; ctx.fill();
+  // sunlit rim
+  ctx.beginPath();
+  for (let x = 0; x <= W; x += 8) { const y = hillY(x, base, amp, seed) + off; x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+  ctx.strokeStyle = 'rgba(255,250,200,0.35)'; ctx.lineWidth = 3; ctx.stroke();
+}
+function grass(base, amp, seed, t, grow, cols, off = 0, h = 18) {
+  if (grow <= 0) return;
+  const r = rng(seed * 31 + 7);
+  ctx.lineCap = 'round';
+  for (let x = -4; x <= W + 4; x += 5) {
+    const y = hillY(x, base, amp, seed) + off + 4, bh = h * (0.5 + r()) * grow;
+    const sway = Math.sin(t * 2.2 + x * 0.018) * 5 * grow;
+    ctx.strokeStyle = cols[Math.floor(r() * cols.length)]; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + sway * 0.4, y - bh * 0.6, x + sway, y - bh); ctx.stroke();
+  }
+}
+function tree(x, y, s, g, t, seed, pal) {
+  if (g <= 0) return;
+  pal = pal || ['#2f5d3a', '#4d8a45', '#8cc265', '#c9e58a'];
+  const r = rng(seed * 11 + 3);
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * g, s * g);
+  ctx.fillStyle = '#5a4030';
+  ctx.beginPath(); ctx.moveTo(-10, 0); ctx.quadraticCurveTo(-6, -50, -14, -95); ctx.lineTo(10, -95); ctx.quadraticCurveTo(4, -50, 10, 0); ctx.fill();
+  const sw = Math.sin(t * 1.3 + seed) * 3;
+  const blobs = [];
+  for (let i = 0; i < 9; i++) blobs.push([(r() - 0.5) * 120 + sw, -120 - r() * 70, 32 + r() * 24]);
+  ctx.fillStyle = pal[0]; for (const b of blobs) circle(b[0] + 4, b[1] + 8, b[2] * 1.05);
+  ctx.fillStyle = pal[1]; for (const b of blobs) circle(b[0] - 3, b[1] - 3, b[2] * 0.9);
+  ctx.fillStyle = pal[2]; for (const b of blobs) circle(b[0] - 12, b[1] - 12, b[2] * 0.55);
+  ctx.fillStyle = pal[3]; for (const b of blobs) if (b[1] < -150) circle(b[0] - 18, b[1] - 18, b[2] * 0.25);
+  ctx.restore();
+}
+function flowers(base, amp, seed, t, g, off = 0) {
+  if (g <= 0) return;
+  const r = rng(seed * 5 + 1), cols = ['#ffffff', '#ffe28a', '#f7a8c4', '#c9b6ff'];
+  for (let i = 0; i < 60; i++) {
+    const x = r() * W, k = clamp(g * 1.6 - r() * 0.6);
+    const y = hillY(x, base, amp, seed) + off + 8 + r() * 40;
+    ctx.fillStyle = cols[Math.floor(r() * 4)];
+    circle(x + Math.sin(t * 2 + x) * 1.5, y, 3.2 * k);
+  }
+}
+function sea(level, t, c1 = '#7fc4e3', c2 = '#2c6e9b', alpha = 1) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  const g = ctx.createLinearGradient(0, level, 0, H);
+  g.addColorStop(0, c1); g.addColorStop(1, c2); ctx.fillStyle = g;
+  ctx.beginPath(); ctx.moveTo(0, H);
+  for (let x = 0; x <= W; x += 10) ctx.lineTo(x, level + Math.sin(x * 0.02 + t * 1.5) * 3);
+  ctx.lineTo(W, H); ctx.fill();
+  const r = rng(77); ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+  for (let i = 0; i < 70; i++) {
+    const yy = level + 8 + Math.pow(r(), 1.6) * (H - level);
+    const len = 10 + r() * 30 * (yy - level) / (H - level + 1);
+    const xx = (r() * W + t * (10 + r() * 15)) % (W + 60) - 30;
+    const a = 0.5 + 0.5 * Math.sin(t * 3 + i);
+    ctx.globalAlpha = alpha * a * 0.8;
+    ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx + len, yy); ctx.stroke();
+  }
+  ctx.restore();
+}
+function sun(x, y, r, alpha = 1, col = '#fff4c8') {
+  ctx.save(); ctx.globalAlpha = alpha;
+  const g = ctx.createRadialGradient(x, y, r * 0.3, x, y, r * 5);
+  g.addColorStop(0, 'rgba(255,240,190,0.8)'); g.addColorStop(1, 'rgba(255,220,150,0)');
+  ctx.fillStyle = g; ctx.fillRect(x - r * 5, y - r * 5, r * 10, r * 10);
+  ctx.fillStyle = col; circle(x, y, r); ctx.restore();
+}
+function moon(x, y, r, alpha, bg) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  const g = ctx.createRadialGradient(x, y, r, x, y, r * 4);
+  g.addColorStop(0, 'rgba(220,230,255,0.35)'); g.addColorStop(1, 'rgba(220,230,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(x - r * 4, y - r * 4, r * 8, r * 8);
+  const m = moon.c || (moon.c = document.createElement('canvas'));
+  m.width = m.height = Math.ceil(r * 2 + 4);
+  const mc = m.getContext('2d');
+  mc.fillStyle = '#f5f2dc'; mc.beginPath(); mc.arc(r + 2, r + 2, r, 0, 6.28); mc.fill();
+  mc.globalCompositeOperation = 'destination-out';
+  mc.beginPath(); mc.arc(r + 2 + r * 0.45, r + 2 - r * 0.2, r * 0.85, 0, 6.28); mc.fill();
+  ctx.drawImage(m, x - r - 2, y - r - 2);
+  ctx.restore();
+}
+function stars(t, alpha, n = 140, maxY = 420) {
+  if (alpha <= 0) return;
+  const r = rng(4242);
+  for (let i = 0; i < n; i++) {
+    const x = r() * W, y = r() * maxY, s = 0.6 + r() * 1.8, ph = r() * 6;
+    ctx.fillStyle = `rgba(255,255,235,${alpha * (0.5 + 0.5 * Math.sin(t * 2.5 + ph))})`;
+    circle(x, y, s);
+  }
+}
+function sparkles(t, x0, y0, spread, n, seed, alpha = 1, col = '255,240,180') {
+  const r = rng(seed);
+  for (let i = 0; i < n; i++) {
+    const ang = r() * 6.28, rad = r() * spread, sp = 0.3 + r();
+    const x = x0 + Math.cos(ang + t * sp * 0.3) * rad, y = y0 + Math.sin(ang + t * sp * 0.3) * rad * 0.6 - ((t * 15 * sp) % 60);
+    const a = alpha * (0.4 + 0.6 * Math.sin(t * 3 + i));
+    const g = ctx.createRadialGradient(x, y, 0, x, y, 6);
+    g.addColorStop(0, `rgba(${col},${clamp(a)})`); g.addColorStop(1, `rgba(${col},0)`);
+    ctx.fillStyle = g; ctx.fillRect(x - 6, y - 6, 12, 12);
+  }
+}
+function petals(t, n, seed, alpha = 1, cols = ['#ffffff', '#ffd6e5', '#d8f0a8']) {
+  const r = rng(seed);
+  for (let i = 0; i < n; i++) {
+    const sp = 40 + r() * 60, x = (r() * (W + 200) + t * sp) % (W + 200) - 100;
+    const y = r() * H * 0.8 + Math.sin(t * 1.5 + i) * 30;
+    ctx.save(); ctx.globalAlpha = alpha * 0.85; ctx.translate(x, y); ctx.rotate(t * 2 + i);
+    ctx.fillStyle = cols[i % cols.length];
+    ctx.beginPath(); ctx.ellipse(0, 0, 5, 2.5, 0, 0, 6.28); ctx.fill(); ctx.restore();
+  }
+}
+function bird(x, y, s, t, ph) {
+  const f = Math.sin(t * 9 + ph) * 0.8;
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.strokeStyle = '#3d3b55'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-14, -f * 10); ctx.quadraticCurveTo(-6, -4 - f * 4, 0, 0); ctx.quadraticCurveTo(6, -4 - f * 4, 14, -f * 10); ctx.stroke();
+  ctx.restore();
+}
+function flock(t, n, seed, alpha = 1) {
+  const r = rng(seed);
+  ctx.save(); ctx.globalAlpha = alpha;
+  for (let i = 0; i < n; i++) {
+    const sp = 50 + r() * 40, y0 = 80 + r() * 220;
+    const x = (r() * (W + 300) + t * sp) % (W + 300) - 150;
+    bird(x, y0 + Math.sin(t * 1.2 + i) * 15, 0.6 + r() * 0.6, t, r() * 6);
+  }
+  ctx.restore();
+}
+function fish(x, y, s, ang, col) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s, s);
+  ctx.fillStyle = col;
+  ctx.beginPath(); ctx.ellipse(0, 0, 22, 9, 0, 0, 6.28); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-18, 0); ctx.lineTo(-34, -10); ctx.lineTo(-34, 10); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.ellipse(4, -3, 10, 3, 0, 0, 6.28); ctx.fill();
+  ctx.fillStyle = '#222'; circle(12, -2, 2);
+  ctx.restore();
+}
+function jumpingFish(t, level, n, seed, alpha = 1) {
+  const r = rng(seed), cols = ['#ff9f6b', '#ffcf5c', '#8fd3c7', '#f78fb3'];
+  ctx.save(); ctx.globalAlpha = alpha;
+  for (let i = 0; i < n; i++) {
+    const period = 2.4 + r() * 1.5, off = r() * period, x0 = 80 + r() * (W - 160);
+    const p = ((t + off) % period) / period; // 0..1
+    if (p < 0.55) {
+      const q = p / 0.55, x = x0 + q * 90, y = level + 30 - Math.sin(q * Math.PI) * (90 + r() * 30);
+      const ang = Math.atan2(-Math.cos(q * Math.PI) * 100, 90);
+      fish(x, y, 0.9, ang, cols[i % 4]);
+      if (q < 0.15 || q > 0.85) { ctx.fillStyle = 'rgba(255,255,255,0.7)'; for (let k = 0; k < 5; k++) circle(x + (k - 2) * 7, level + 26 - Math.random() * 0 - k % 2 * 6, 3); }
+    }
+  }
+  ctx.restore();
+}
+function sheep(x, y, s, t, ph) {
+  const bob = Math.sin(t * 2 + ph) * 1.5;
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = '#3b3340'; ctx.fillRect(-14, -4, 5, 16); ctx.fillRect(8, -4, 5, 16);
+  ctx.fillStyle = '#c8c3d8'; for (const [a, b, r] of [[-12, -16, 12], [0, -20, 14], [12, -16, 12], [-4, -10, 13], [8, -9, 12]]) circle(a + 1, b + 2 + bob, r);
+  ctx.fillStyle = '#fbfaf5'; for (const [a, b, r] of [[-12, -16, 11], [0, -21, 13], [12, -17, 11], [-4, -11, 11], [8, -10, 10]]) circle(a - 1, b + bob, r);
+  const hd = Math.sin(t * 0.8 + ph) > 0.3 ? 10 : 0; // grazing
+  ctx.fillStyle = '#3b3340'; ctx.beginPath(); ctx.ellipse(24, -20 + hd + bob, 7, 9, 0.4, 0, 6.28); ctx.fill();
+  ctx.restore();
+}
+function rabbit(x, y, s, t, ph) {
+  const hop = Math.max(0, Math.sin(t * 5 + ph)) * 14;
+  ctx.save(); ctx.translate(x, y - hop); ctx.scale(s, s);
+  ctx.fillStyle = '#e9dccb';
+  ctx.beginPath(); ctx.ellipse(0, -10, 14, 10, 0, 0, 6.28); ctx.fill();
+  circle(12, -18, 7);
+  ctx.beginPath(); ctx.ellipse(12, -32, 2.5, 9, -0.2, 0, 6.28); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(16, -31, 2.5, 9, 0.2, 0, 6.28); ctx.fill();
+  ctx.fillStyle = '#fff'; circle(-13, -10, 4);
+  ctx.restore();
+}
+function deer(x, y, s, t, ph) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = '#b07a4f';
+  ctx.beginPath(); ctx.ellipse(0, -36, 28, 13, 0, 0, 6.28); ctx.fill();
+  ctx.fillRect(-22, -30, 5, 30); ctx.fillRect(-12, -30, 5, 30); ctx.fillRect(12, -30, 5, 30); ctx.fillRect(20, -30, 5, 30);
+  const look = Math.sin(t * 0.7 + ph) * 0.15;
+  ctx.save(); ctx.translate(24, -44); ctx.rotate(-0.5 + look);
+  ctx.fillRect(-4, -26, 9, 28); ctx.beginPath(); ctx.ellipse(4, -30, 11, 7, 0.3, 0, 6.28); ctx.fill();
+  ctx.strokeStyle = '#6e4a2e'; ctx.lineWidth = 2.5; ctx.beginPath();
+  ctx.moveTo(-1, -35); ctx.lineTo(-8, -52); ctx.moveTo(-5, -45); ctx.lineTo(-13, -48);
+  ctx.moveTo(4, -36); ctx.lineTo(6, -54); ctx.moveTo(5, -46); ctx.lineTo(12, -50); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'; for (let i = 0; i < 5; i++) circle(-12 + i * 7, -40 + (i % 2) * 5, 2);
+  ctx.restore();
+}
+function person(x, y, s, t, kind) {
+  // back view, wind-blown — two simple figures looking at the world
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  const w = Math.sin(t * 2) * 3;
+  ctx.fillStyle = '#4a3a45';
+  if (kind === 'f') {
+    ctx.fillStyle = '#e8eef7';
+    ctx.beginPath(); ctx.moveTo(-9, -48); ctx.lineTo(9, -48); ctx.lineTo(16 + w, 0); ctx.lineTo(-14, 0); ctx.fill();
+    ctx.fillStyle = '#d9a37a'; circle(0, -58, 9);
+    ctx.fillStyle = '#3a2a2a'; ctx.beginPath(); ctx.moveTo(-9, -62); ctx.quadraticCurveTo(0, -72, 9, -62);
+    ctx.quadraticCurveTo(14 + w * 2, -45, 20 + w * 3, -38); ctx.quadraticCurveTo(4, -46, -9, -50); ctx.fill();
+  } else {
+    ctx.fillStyle = '#c7d9a8';
+    ctx.beginPath(); ctx.moveTo(-11, -50); ctx.lineTo(11, -50); ctx.lineTo(12 + w * 0.5, -14); ctx.lineTo(-12, -14); ctx.fill();
+    ctx.fillStyle = '#5b4636'; ctx.fillRect(-9, -14, 7, 14); ctx.fillRect(2, -14, 7, 14);
+    ctx.fillStyle = '#d9a37a'; circle(0, -60, 10);
+    ctx.fillStyle = '#2e2222'; ctx.beginPath(); ctx.arc(0, -62, 10.5, Math.PI, 0); ctx.fill();
+  }
+  ctx.restore();
+}
+
+// ---------- text ----------
+function wrap(text, maxW) {
+  const words = text.split(' '), lines = []; let cur = '';
+  for (const w of words) { const test = cur ? cur + ' ' + w : w;
+    if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; } else cur = test; }
+  if (cur) lines.push(cur); return lines;
+}
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function caption(text, alpha) {
+  if (alpha <= 0 || !text) return;
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.font = '31px Tiro'; const lines = wrap(text, 1020);
+  const lh = 46, bh = lines.length * lh + 30, by = H - 34 - bh;
+  ctx.shadowColor = 'rgba(40,30,60,0.25)'; ctx.shadowBlur = 18;
+  ctx.fillStyle = 'rgba(255,250,236,0.9)'; roundRect(110, by, 1060, bh, 22); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(160,130,90,0.35)'; ctx.lineWidth = 2; roundRect(116, by + 6, 1048, bh - 12, 18); ctx.stroke();
+  ctx.fillStyle = '#3a3552'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  lines.forEach((l, i) => ctx.fillText(l, W / 2, by + 15 + lh / 2 + i * lh + (6 * (1 - alpha))));
+  ctx.restore();
+}
+function dayLabel(text, alpha) {
+  if (alpha <= 0 || !text) return;
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.font = '600 34px Baloo'; const w = ctx.measureText(text).width + 50;
+  ctx.fillStyle = 'rgba(255,248,230,0.88)'; roundRect(40, 34, w, 60, 30); ctx.fill();
+  ctx.fillStyle = '#c0573e'; ctx.textBaseline = 'middle'; ctx.fillText(text, 65, 66);
+  ctx.restore();
+}
+function bigText(text, x, y, size, col, alpha, font = 'Baloo', weight = '600') {
+  ctx.save(); ctx.globalAlpha = alpha; ctx.font = `${weight} ${size}px ${font}`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(60,40,80,0.35)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 3;
+  ctx.fillStyle = col; ctx.fillText(text, x, y); ctx.restore();
+}
+
+// ---------- standard Ghibli-ish meadow ----------
+function meadow(t, o = {}) {
+  const g = o.grow ?? 1, rise = o.rise ?? 1;
+  const off = k => (1 - rise) * (300 + k * 60);
+  hill(420, 50, 1.1, o.far1 || '#9cc7b4', o.far2 || '#7fb39b', off(0));       // distant
+  hill(470, 60, 2.7, o.mid1 || '#86c26a', o.mid2 || '#5a9a4a', off(1));
+  if (o.trees) {
+    o.trees.forEach(([x, s, d], i) => tree(x, hillY(x, 470, 60, 2.7) + off(1) + 6, s, seg(g * 1.4 - d, 0, 1) * (o.treeGrow ?? 1), t, i + 1));
+  }
+  hill(560, 45, 4.2, o.near1 || '#a5d46f', o.near2 || '#6aa548', off(2));
+  grass(560, 45, 4.2, t, g, ['#5f9e3f', '#78b84e', '#9bd062', '#4f8a36'], off(2), 20);
+  flowers(560, 45, 4.2, t, o.flowers ?? g, off(2));
+}
+
+// ---------- scenes ----------
+const scenes = [
+  { dur: 7, label: '', caps: [],
+    draw(t) {
+      sky([[0, '#8fb8e8'], [0.55, '#f6d7c3'], [1, '#ffe9c2']]);
+      sun(980, 330, 46, 0.9);
+      cloudField(t, 10, 5, 70, 140, 0.85);
+      meadow(t, { trees: [[160, 1.0, 0], [1130, 0.8, 0]] });
+      petals(t, 24, 3);
+      const a = seg(t, 0.6, 2.0);
+      bigText('उत्पत्ति — अध्याय 1', W / 2, 250 - (1 - a) * 20, 84, '#fffaf0', a);
+      bigText('सृष्टि की कहानी · एक एनिमेटेड व्याख्या', W / 2, 340, 38, '#fff3dc', seg(t, 1.6, 3.0), 'Tiro', '400');
+    } },
+
+  { dur: 12, label: 'आरंभ',
+    caps: ['आरंभ में परमेश्वर ने आकाश और पृथ्वी की सृष्टि की।',
+           'पृथ्वी बेडौल और सुनसान थी, और गहरे जल के ऊपर अंधकार था।',
+           'और परमेश्वर का आत्मा जल के ऊपर मंडराता था।'],
+    draw(t) {
+      sky([[0, '#05060f'], [0.6, '#0e1530'], [1, '#132443']]);
+      ctx.fillStyle = 'rgba(120,140,200,0.06)';
+      for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.ellipse((i * 300 + t * 12) % (W + 400) - 200, 360 + i * 12, 320, 30, 0, 0, 6.28); ctx.fill(); }
+      sea(430, t * 0.6, '#1b2c4d', '#070b18');
+      const a = seg(t, 7.5, 9);
+      const x = 200 + (t - 7) * 110, y = 360 + Math.sin(t * 1.4) * 22;
+      if (a > 0) {
+        for (let k = 0; k < 18; k++) { const xx = x - k * 22, yy = 360 + Math.sin((t - k * 0.2) * 1.4) * 22;
+          ctx.fillStyle = `rgba(255,236,170,${a * 0.25 * (1 - k / 18)})`; circle(xx, yy, 10 - k * 0.4); }
+        const g = ctx.createRadialGradient(x, y, 2, x, y, 90);
+        g.addColorStop(0, `rgba(255,246,210,${a})`); g.addColorStop(0.25, `rgba(255,220,150,${a * 0.5})`); g.addColorStop(1, 'rgba(255,200,120,0)');
+        ctx.fillStyle = g; ctx.fillRect(x - 90, y - 90, 180, 180);
+        ctx.fillStyle = `rgba(255,230,160,${a * 0.18})`; ctx.beginPath(); ctx.ellipse(x, 440, 120, 10, 0, 0, 6.28); ctx.fill();
+        sparkles(t, x, y, 70, 20, 5, a);
+      }
+    } },
+
+  { dur: 12, label: 'दिन 1 · उजियाला',
+    caps: ['परमेश्वर ने कहा, “उजियाला हो” — और उजियाला हो गया।',
+           'उसने देखा कि उजियाला अच्छा है, और उसे अंधकार से अलग किया।',
+           'उजियाले को “दिन” और अंधकार को “रात” कहा — यह पहला दिन था।'],
+    draw(t) {
+      const b = seg(t, 1.2, 3.5), split = seg(t, 7.5, 9.5);
+      sky([[0, mix('#05060f', '#ffe9b0', b)], [0.6, mix('#0e1530', '#fff6dc', b)], [1, mix('#132443', '#ffd9a0', b)]]);
+      if (split > 0) { // right half becomes night
+        const g = ctx.createLinearGradient(W * 0.38, 0, W * 0.62, 0);
+        g.addColorStop(0, 'rgba(14,21,52,0)'); g.addColorStop(1, `rgba(14,21,52,${split})`);
+        ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+        ctx.save(); ctx.beginPath(); ctx.rect(W * 0.55, 0, W, H); ctx.clip(); stars(t, split, 90, 420); ctx.restore();
+        bigText('दिन', W * 0.22, 200, 64, '#c0573e', split);
+        bigText('रात', W * 0.8, 200, 64, '#e8ecff', split);
+      }
+      const r = 40 + b * 900;
+      const g = ctx.createRadialGradient(W / 2, 330, 0, W / 2, 330, r);
+      g.addColorStop(0, `rgba(255,255,240,${0.95 * seg(t, 1, 1.6) * (1 - split * 0.7)})`); g.addColorStop(0.3, `rgba(255,236,170,${0.5 * (1 - split)})`); g.addColorStop(1, 'rgba(255,220,150,0)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      sea(430, t * 0.6, mix('#1b2c4d', '#9fd0e8', b * (1 - split * 0.4)), mix('#070b18', '#3b7cab', b * (1 - split * 0.5)));
+      sparkles(t, W / 2, 330, 300 * b, 40, 9, b * (1 - split));
+    } },
+
+  { dur: 11, label: 'दिन 2 · आकाश',
+    caps: ['दूसरे दिन परमेश्वर ने जल के बीच एक अंतर बनाया।',
+           'ऊपर का जल और नीचे का जल अलग हो गया — बीच में खुला आकाश!',
+           'परमेश्वर ने उस अंतर को “आकाश” नाम दिया।'],
+    draw(t) {
+      const o = seg(t, 1.5, 7);
+      sky([[0, '#7fb1e6'], [0.5, '#bfe0f5'], [1, '#e9f6ff']]);
+      cloudField(t, 30, 7, 140, 330, seg(t, 5, 8));
+      sun(1050, 150, 40, seg(t, 5, 8));
+      // upper waters rising away
+      const top = lerp(380, -60, o);
+      ctx.fillStyle = '#5d8fb8'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(W, 0);
+      for (let x = W; x >= 0; x -= 10) ctx.lineTo(x, top + Math.sin(x * 0.015 + t * 1.8) * 14);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      for (let x = 0; x < W; x += 40) circle(x + (t * 20) % 40, top + Math.sin(x * 0.015 + t * 1.8) * 14, 12);
+      sea(lerp(380, 450, o), t);
+      // upward arrows of separation
+      const aa = seg(t, 1.5, 2.5) * (1 - seg(t, 6, 7));
+      if (aa > 0) { ctx.strokeStyle = `rgba(255,255,255,${aa * 0.8})`; ctx.lineWidth = 4; ctx.lineCap = 'round';
+        for (const x of [400, 640, 880]) { ctx.beginPath(); ctx.moveTo(x, 360); ctx.lineTo(x, 300); ctx.moveTo(x - 12, 314); ctx.lineTo(x, 300); ctx.lineTo(x + 12, 314);
+          ctx.moveTo(x, 400); ctx.lineTo(x, 440); ctx.moveTo(x - 12, 428); ctx.lineTo(x, 440); ctx.lineTo(x + 12, 428); ctx.stroke(); } }
+      flock(t, 0, 1);
+    } },
+
+  { dur: 13, label: 'दिन 3 · भूमि और पेड़-पौधे',
+    caps: ['तीसरे दिन जल एक जगह इकट्ठा हुआ और सूखी भूमि दिखाई दी।',
+           'सूखी भूमि को “पृथ्वी” और इकट्ठे जल को “समुद्र” कहा गया।',
+           'फिर घास, बीज वाले पौधे और फलदार पेड़ उग आए — हर एक अपनी जाति के अनुसार।'],
+    draw(t) {
+      sky([[0, '#86b6ea'], [0.55, '#cfe6f5'], [1, '#fdf1d6']]);
+      sun(1030, 140, 38);
+      cloudField(t, 50, 6, 110, 300);
+      sea(400, t);
+      meadow(t, { rise: seg(t, 0.8, 4), grow: seg(t, 5, 9), flowers: seg(t, 9, 11.5),
+        trees: [[180, 1.0, 0.1], [330, 0.7, 0.3], [900, 0.85, 0.2], [1120, 1.1, 0]] });
+      petals(t, 16 * seg(t, 9, 11), 8);
+    } },
+
+  { dur: 12, label: 'दिन 4 · सूरज, चाँद, तारे',
+    caps: ['चौथे दिन परमेश्वर ने आकाश में ज्योतियाँ रखीं —',
+           'दिन पर राज करने के लिए सूरज, रात के लिए चाँद, और अनगिनत तारे।',
+           'ये समय, ऋतुओं, दिनों और वर्षों के चिह्न बने।'],
+    draw(t) {
+      const p = t / 12;
+      const sunset = seg(p, 0.35, 0.55), night = seg(p, 0.5, 0.7);
+      const top = night > 0 ? mix('#f39b7b', '#141a3c', night) : mix('#7fb1e6', '#f39b7b', sunset);
+      const midc = night > 0 ? mix('#ffcf9e', '#2b2f5e', night) : mix('#cfe6f5', '#ffcf9e', sunset);
+      const bot = night > 0 ? mix('#ffe2b8', '#4a4a7a', night) : mix('#fdf1d6', '#ffe2b8', sunset);
+      sky([[0, top], [0.6, midc], [1, bot]]);
+      stars(t, night, 160, 450);
+      const sa = clamp(p / 0.6) * Math.PI;
+      sun(640 - Math.cos(sa) * 560, 470 - Math.sin(sa) * 360, 44, 1 - night);
+      const ma = clamp((p - 0.55) / 0.45) * Math.PI * 0.6;
+      moon(640 - Math.cos(ma) * 520 - 80, 470 - Math.sin(ma) * 380, 34, night, mix('#ffcf9e', '#141a3c', night));
+      cloudField(t, 70, 4, 130, 260, 1 - night * 0.7, night > 0.3 ? { shadow: '#3b3f72', body: '#6a6aa0', hi: '#9a9ac8' } : undefined);
+      ctx.save(); ctx.globalAlpha = 1;
+      meadow(t, { trees: [[200, 1.0, 0], [1060, 0.9, 0]],
+        far1: mix('#9cc7b4', '#3a4a6a', night), far2: mix('#7fb39b', '#2b3a58', night),
+        mid1: mix('#86c26a', '#2f4a4f', night), mid2: mix('#5a9a4a', '#22383e', night),
+        near1: mix('#a5d46f', '#36574a', night), near2: mix('#6aa548', '#24403a', night) });
+      ctx.restore();
+      if (night > 0) { ctx.fillStyle = `rgba(20,24,60,${night * 0.35})`; ctx.fillRect(0, 0, W, H); sparkles(t, 640, 560, 600, 30, 21, night, '220,255,150'); }
+    } },
+
+  { dur: 12, label: 'दिन 5 · मछलियाँ और पक्षी',
+    caps: ['पाँचवें दिन जल जीवित प्राणियों से भर गया —',
+           'समुद्र में बड़ी-छोटी मछलियाँ, और आकाश में उड़ते पक्षी।',
+           'परमेश्वर ने उन्हें आशीष दी: “फूलो-फलो और बढ़ो।”'],
+    draw(t) {
+      sky([[0, '#79aee6'], [0.55, '#cbe5f6'], [1, '#fff0d8']]);
+      sun(200, 130, 36);
+      cloudField(t, 90, 6, 110, 280);
+      hill(400, 30, 0.3, '#9cc7b4', '#7fb39b');
+      sea(400, t, '#8fd0ea', '#2a6c99');
+      jumpingFish(t, 400, 7, 12, seg(t, 1, 2.5));
+      flock(t, 12, 33, seg(t, 3, 5));
+      // whale spout far
+      const wa = seg(t, 6, 7);
+      if (wa > 0) { ctx.fillStyle = `rgba(60,90,130,${wa})`; ctx.beginPath(); ctx.ellipse(1000, 470, 70, 18, 0, Math.PI, 0); ctx.fill();
+        const s = (t * 1.2) % 1; ctx.fillStyle = `rgba(255,255,255,${wa * (1 - s)})`;
+        for (let k = 0; k < 6; k++) circle(990 + (k - 2.5) * 10 * s * 2, 450 - s * 60 - Math.abs(k - 2.5) * 4, 6); }
+    } },
+
+  { dur: 14, label: 'दिन 6 · पशु और मनुष्य',
+    caps: ['छठे दिन भूमि पर पशु, रेंगने वाले जीव और जंगली जानवर बनाए गए।',
+           'फिर परमेश्वर ने मनुष्य को अपने स्वरूप में बनाया — नर और नारी।',
+           'उन्हें आशीष दी और पृथ्वी व सब जीवों की देखभाल का ज़िम्मा सौंपा।'],
+    draw(t) {
+      sky([[0, '#84b4e8'], [0.55, '#d6eaf5'], [1, '#fff1d4']]);
+      sun(1080, 130, 38);
+      cloudField(t, 110, 6, 110, 290);
+      meadow(t, { trees: [[160, 1.1, 0], [1150, 0.9, 0]] });
+      const a1 = seg(t, 0.8, 2.5);
+      ctx.save(); ctx.globalAlpha = a1;
+      sheep(360 + t * 4, 600, 1.2, t, 0); sheep(470 + t * 3, 625, 1.0, t, 2); sheep(560 + t * 2, 595, 0.9, t, 4);
+      deer(900, 560, 1.1, t, 1);
+      rabbit(250 + (t * 25) % 200, 650, 1, t, 0);
+      ctx.restore();
+      const a2 = seg(t, 5.2, 7);
+      if (a2 > 0) {
+        const hx = 700, hy = hillY(700, 470, 60, 2.7) + 4;
+        sparkles(t, hx, hy - 40, 60, 18, 44, a2 * (1 - seg(t, 8, 10)));
+        ctx.save(); ctx.globalAlpha = a2; person(hx - 16, hy, 1.1, t, 'm'); person(hx + 18, hy, 1.05, t, 'f'); ctx.restore();
+      }
+      petals(t, 20, 15);
+    } },
+
+  { dur: 13, label: '',
+    caps: ['परमेश्वर ने अपनी बनाई हर चीज़ को देखा —',
+           '“और देखो, वह बहुत ही अच्छा था।” (उत्पत्ति 1:31)'],
+    draw(t) {
+      sky([[0, '#86b6ea'], [0.55, '#f3dccb'], [1, '#ffe6bc']]);
+      sun(1000, 300, 46);
+      cloudField(t, 130, 4, 330, 380, 0.9);
+      sea(430, t);
+      meadow(t, { trees: [[150, 1.0, 0], [380, 0.75, 0], [1150, 1.0, 0]] });
+      sheep(500, 610, 0.9, t, 1); rabbit(820, 640, 0.9, t, 2);
+      flock(t, 6, 5);
+      petals(t, 24, 16);
+      const items = ['1 उजियाला', '2 आकाश', '3 भूमि व पौधे', '4 सूरज-चाँद-तारे', '5 मछलियाँ व पक्षी', '6 पशु व मनुष्य'];
+      ctx.font = '600 26px Baloo';
+      const widths = items.map(s => ctx.measureText(s).width + 36), total = widths.reduce((a, b) => a + b, 0) + 12 * 5;
+      let x = (W - total) / 2;
+      items.forEach((s, i) => {
+        const a = seg(t, 0.6 + i * 0.5, 1.1 + i * 0.5);
+        ctx.save(); ctx.globalAlpha = a; ctx.translate(0, (1 - a) * 12);
+        ctx.fillStyle = 'rgba(255,248,230,0.92)'; roundRect(x, 60, widths[i], 48, 24); ctx.fill();
+        ctx.fillStyle = '#c0573e'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillText(s, x + 18, 86);
+        ctx.restore(); x += widths[i] + 12;
+      });
+      bigText('बहुत ही अच्छा!', W / 2, 220, 76, '#fffaf0', seg(t, 6.5, 8));
+    } },
+
+  { dur: 8, label: '', caps: [],
+    draw(t) {
+      sky([[0, '#5a5f9e'], [0.5, '#f0a07f'], [1, '#ffd59a']]);
+      sun(640, 470, 60, 1, '#fff0c0');
+      cloudField(t, 150, 5, 120, 260, 1, { shadow: '#b77a8c', body: '#f5b9a0', hi: '#ffe3c8' });
+      hill(470, 50, 1.1, '#6a5a7e', '#4b3f62'); hill(560, 45, 4.2, '#4a3b56', '#2e2440');
+      bigText('सीख', W / 2, 150, 60, '#fffaf0', seg(t, 0.5, 1.5));
+      bigText('सृष्टि सुंदर है और उद्देश्य से बनी है —', W / 2, 240, 40, '#fff6e6', seg(t, 1.2, 2.4), 'Tiro', '400');
+      bigText('और उसकी देखभाल करना हमारी ज़िम्मेदारी है।', W / 2, 300, 40, '#fff6e6', seg(t, 2.2, 3.4), 'Tiro', '400');
+      bigText('अगला भाग: अध्याय 2 — सातवाँ दिन (विश्राम)', W / 2, 640, 30, '#ffe8c8', seg(t, 4, 5), 'Tiro', '400');
+    } },
+];
+
+let starts = [], acc = 0;
+for (const s of scenes) { starts.push(acc); acc += s.dur; }
+const TOTAL = acc;
+
+// paper grain overlay, computed once
+const grain = document.createElement('canvas'); grain.width = 640; grain.height = 360;
+{ const g = grain.getContext('2d'), d = g.createImageData(640, 360), r = rng(99);
+  for (let i = 0; i < d.data.length; i += 4) { const v = 128 + (r() - 0.5) * 70; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 22; }
+  g.putImageData(d, 0, 0); }
+
+function renderAt(T) {
+  let i = scenes.length - 1;
+  for (let k = 0; k < scenes.length; k++) if (T < starts[k] + scenes[k].dur) { i = k; break; }
+  const s = scenes[i], t = T - starts[i];
+  ctx.save(); s.draw(t); ctx.restore();
+  ctx.textAlign = 'left';
+  // captions spread evenly
+  if (s.caps.length) {
+    const slot = (s.dur - 0.6) / s.caps.length, ci = Math.min(s.caps.length - 1, Math.floor((t - 0.4) / slot));
+    if (ci >= 0) { const lt = t - 0.4 - ci * slot; caption(s.caps[ci], Math.min(seg(lt, 0, 0.5), 1 - seg(lt, slot - 0.35, slot))); }
+  }
+  dayLabel(s.label, seg(t, 0.3, 1) * (1 - seg(t, s.dur - 0.5, s.dur)));
+  // vignette + grain
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, H * 0.95);
+  v.addColorStop(0, 'rgba(40,20,40,0)'); v.addColorStop(1, 'rgba(40,20,40,0.32)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'overlay'; ctx.drawImage(grain, 0, 0, W, H); ctx.globalCompositeOperation = 'source-over';
+  // scene fades
+  const fade = Math.max(1 - seg(t, 0, 0.6), i < scenes.length - 1 ? seg(t, s.dur - 0.6, s.dur) : seg(t, s.dur - 1.5, s.dur));
+  if (fade > 0) { ctx.fillStyle = `rgba(253,246,227,${fade})`; ctx.fillRect(0, 0, W, H); }
+}
+window.TOTAL = TOTAL;
+window.renderAt = renderAt;
+window.ready = document.fonts.ready.then(() => Promise.all([document.fonts.load('31px Tiro', 'आ'), document.fonts.load('600 34px Baloo', 'दि')]));
+
+// live preview when opened in a browser
+if (!navigator.webdriver) { const t0 = performance.now(); (function loop() { renderAt(((performance.now() - t0) / 1000) % TOTAL); requestAnimationFrame(loop); })(); }
+</script>
+</body>
+</html>
