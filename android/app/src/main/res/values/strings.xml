@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kishan Bagh Call</string>
+    <string name="tagline">Phone-to-phone calls with no Wi-Fi and no internet (Bluetooth / Wi-Fi Direct, about 10–100 m)</string>
+    <string name="your_name">Your name</string>
+    <string name="go_online">Go online</string>
+    <string name="searching">Online as %1$s. Looking for nearby phones… tap a name to call.</string>
+    <string name="no_peers">Nobody nearby yet. The other person must open this app and tap Go online.</string>
+    <string name="calling">Calling…</string>
+    <string name="connected">Connected</string>
+    <string name="incoming_title">Incoming call</string>
+    <string name="incoming_message">%1$s is calling you</string>
+    <string name="answer">Answer</string>
+    <string name="decline">Decline</string>
+    <string name="mute">Mute</string>
+    <string name="unmute">Unmute</string>
+    <string name="speaker_on">Speaker</string>
+    <string name="speaker_off">Earpiece</string>
+    <string name="end_call">End call</string>
+    <string name="call_ended">Call ended</string>
+    <string name="call_failed">Could not connect. Move closer and try again.</string>
+    <string name="call_declined">Call was declined or the other phone is busy</string>
+    <string name="permissions_needed">Microphone, Bluetooth and Nearby devices permissions are needed for offline calls.</string>
+    <string name="enter_name">Please enter your name</string>
+    <string name="start_failed">Could not start: %1$s. Turn on Bluetooth and Location, then try again.</string>
+</resources>

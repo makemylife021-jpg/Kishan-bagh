@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1f7a3a">
+  <title>Kishan Bagh Call</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Kishan Bagh Call</h1>
+    <p class="sub">Calls with no internet: everyone joins the same Wi-Fi or phone hotspot</p>
+  </header>
+
+  <main>
+    <section id="join-screen" class="card">
+      <label for="name-input">Your name</label>
+      <input id="name-input" maxlength="40" placeholder="e.g. Ramesh" autocomplete="name">
+      <button id="join-btn" class="primary">Go online</button>
+      <p id="join-error" class="error" hidden></p>
+    </section>
+
+    <section id="home-screen" hidden>
+      <p class="me">You are online as <strong id="my-name"></strong></p>
+      <h2>People online</h2>
+      <ul id="user-list"></ul>
+      <p id="empty-list" class="hint">Nobody else is online yet. Ask them to open this same address.</p>
+    </section>
+
+    <section id="call-screen" class="card call" hidden>
+      <p id="call-status">Calling…</p>
+      <h2 id="call-peer"></h2>
+      <p id="call-timer">00:00</p>
+      <div class="call-actions">
+        <button id="mute-btn">Mute</button>
+        <button id="hangup-btn" class="danger">End call</button>
+      </div>
+    </section>
+
+    <section id="incoming-screen" class="card call" hidden>
+      <p>Incoming call</p>
+      <h2 id="incoming-peer"></h2>
+      <div class="call-actions">
+        <button id="accept-btn" class="primary">Answer</button>
+        <button id="decline-btn" class="danger">Decline</button>
+      </div>
+    </section>
+
+    <p id="toast" class="toast" hidden></p>
+  </main>
+
+  <audio id="remote-audio" autoplay playsinline></audio>
+  <script src="app.js"></script>
+</body>
+</html>
