@@ -41,6 +41,13 @@ Rules for good reels:
 - `voice`: any edge-tts voice. Hindi: `hi-IN-MadhurNeural` / `hi-IN-SwaraNeural`; Indian English: `en-IN-PrabhatNeural` / `en-IN-NeerjaNeural`; US: `en-US-AndrewNeural` / `en-US-AvaNeural`. Match the voice to the script language.
 - No copyrighted lyrics, no medical/financial claims presented as fact, no impersonation.
 
+**Ready-made videos** (made elsewhere, e.g. an AI brand film): put the mp4 (9:16, 3-90 s, < 100 MB) in
+`content/videos/` and queue a JSON with a `video` key instead of `scenes` - it is posted as-is:
+
+```json
+{"title": "...", "video": "content/videos/my-film.mp4", "caption": "...", "hashtags": ["#a"]}
+```
+
 After writing, run `python -m instagram_autopilot.autopilot status` and tell the user how many are queued.
 
 ## 2. Rendering a preview

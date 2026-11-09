@@ -39,6 +39,21 @@ def read_state() -> dict:
     return dict(line.split("=", 1) for line in STATE.read_text().splitlines() if "=" in line)
 
 
+def use_prerendered(script: dict) -> tuple[Path, Path]:
+    """Queue item with "video": "content/videos/x.mp4" - post that file as-is."""
+    src = ROOT / script["video"]
+    if not src.exists():
+        sys.exit(f"pre-rendered video not found: {src}")
+    OUT.mkdir(exist_ok=True)
+    video = OUT / src.name
+    shutil.copy(src, video)
+    caption = OUT / f"{src.stem}.caption.txt"
+    tags = " ".join(script.get("hashtags", []))
+    caption.write_text(f"{script.get('caption', '').strip()}\n\n{tags}".strip() + "\n", encoding="utf-8")
+    print(f"using pre-rendered video {src.relative_to(ROOT)}")
+    return video, caption
+
+
 def cmd_render() -> None:
     script_path = next_script()
     if not script_path:
@@ -46,9 +61,12 @@ def cmd_render() -> None:
         STATE.parent.mkdir(exist_ok=True)
         STATE.write_text("EMPTY=1\n")
         return
-    music = os.environ.get("REEL_MUSIC")
-    video, caption = build_reel(json.loads(script_path.read_text(encoding="utf-8")), OUT,
-                                Path(music) if music else None)
+    script = json.loads(script_path.read_text(encoding="utf-8"))
+    if script.get("video"):
+        video, caption = use_prerendered(script)
+    else:
+        music = os.environ.get("REEL_MUSIC")
+        video, caption = build_reel(script, OUT, Path(music) if music else None)
     STATE.write_text(f"SCRIPT={script_path}\nVIDEO={video}\nCAPTION={caption}\n")
     gh_out = os.environ.get("GITHUB_OUTPUT")
     if gh_out:
