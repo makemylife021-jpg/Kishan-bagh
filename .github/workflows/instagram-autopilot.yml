@@ -1,0 +1,88 @@
+name: Instagram Reel Autopilot
+
+on:
+  schedule:
+    - cron: "17 12 * * *"   # every day at 12:17 UTC (17:47 IST) - change as you like
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish to Instagram (false = only render and upload as artifact)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instagram-autopilot
+  cancel-in-progress: false
+
+jobs:
+  reel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ffmpeg and Python packages
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+          pip install -r instagram_autopilot/requirements.txt
+
+      - name: Render next reel from content/queue
+        id: render
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          python -m instagram_autopilot.autopilot render
+          if grep -q EMPTY=1 out/next.env; then echo "empty=1" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Keep a copy as a workflow artifact
+        if: steps.render.outputs.empty != '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: reel
+          path: out/*
+
+      # Instagram downloads the video from a public URL. We push it to an
+      # orphan "media" branch and use its raw.githubusercontent.com link.
+      # This needs the repository to be PUBLIC. For a private repo, replace
+      # this step with an upload to S3 / Cloudflare R2 / any public host.
+      - name: Host video on the media branch
+        id: host
+        if: steps.render.outputs.empty != '1' && (github.event_name == 'schedule' || inputs.publish)
+        run: |
+          VIDEO="${{ steps.render.outputs.video }}"
+          NAME="$(date +%Y%m%d-%H%M%S)-$(basename "$VIDEO")"
+          git config user.name "reel-autopilot"
+          git config user.email "reel-autopilot@users.noreply.github.com"
+          mkdir -p /tmp/media && cp "$VIDEO" "/tmp/media/$NAME"
+          if git ls-remote --exit-code origin media >/dev/null; then
+            git fetch origin media && git worktree add /tmp/mediawt media
+          else
+            git worktree add --detach /tmp/mediawt && (cd /tmp/mediawt && git checkout --orphan media && git rm -rfq .)
+          fi
+          cd /tmp/mediawt
+          # keep only the 10 newest videos so the branch stays small
+          ls -1t *.mp4 2>/dev/null | tail -n +10 | xargs -r git rm -q
+          cp "/tmp/media/$NAME" . && git add "$NAME"
+          git commit -qm "media: $NAME" && git push -q origin media
+          echo "url=https://raw.githubusercontent.com/${{ github.repository }}/media/$NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to Instagram
+        if: steps.host.outputs.url != ''
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          sleep 20   # give the raw CDN a moment
+          python -m instagram_autopilot.autopilot publish "${{ steps.host.outputs.url }}"
+
+      - name: Move script to content/posted
+        if: steps.render.outputs.empty != '1' && (github.event_name == 'schedule' || inputs.publish)
+        run: |
+          python -m instagram_autopilot.autopilot done
+          git add -A content && git commit -qm "autopilot: posted $(basename '${{ steps.render.outputs.script }}')" && git push -q
