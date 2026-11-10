@@ -621,6 +621,16 @@ def load_voice_dir(vdir, tempo=1.0):
     return out
 
 
+HIT_FN = None  # optional override: returns global times of "big moment" hits (shake + flash + impact)
+
+
+def hit_times():
+    if HIT_FN:
+        return HIT_FN()
+    fl = [s for s in SCENES if s[0] == "flow"]
+    return [fl[0][1] + PH["flow"][2][0]] if fl else []
+
+
 def build_timeline(clips):
     """Scene durations follow the voice-over; fills SCENES, PH, SUBS, POPS, DUR, NF."""
     global DUR, NF
@@ -647,14 +657,14 @@ def build_timeline(clips):
         "cta": [0.05, 0.35, 0.9],
     }
     for name, st, _ in SCENES:
-        for lt in local[name]:
+        for lt in local.get(name, [0.1, 0.45]):
             POPS.append(st + lt)
-    POPS.append(SCENES[0][1] + PH["hook"][1][0])
-    for ps in PH["hook"][2:]:
+    if len(PH.get("hook", [])) >= 3:
+        POPS.append(SCENES[0][1] + PH["hook"][1][0])
+    for ps in PH.get("hook", [])[2:]:
         for i in range(3):
             POPS.append(ps[0] + 0.3 + i * 0.15)
-    fl = [s for s in SCENES if s[0] == "flow"][0][1]
-    POPS.extend([fl + PH["flow"][1][0], fl + PH["flow"][2][0]])
+    POPS.extend(hit_times())
 
 
 # ---------------------------------------------------------------- subtitles (word-by-word karaoke)
@@ -764,9 +774,7 @@ def frame(i):
     # zoom punch after each cut + shake on "AKELE?" and on the strike-through
     punch = 1 + 0.06 * (1 - out_cubic(prog(lt, TRANS if idx else 0, 0.45)))
     dx = dy = 0
-    shakes = [SCENES[0][1] + 0.7]
-    fl = [s for s in SCENES if s[0] == "flow"][0][1]
-    shakes.append(fl + PH["flow"][2][0])
+    shakes = [SCENES[0][1] + 0.7] + hit_times()
     for sh in shakes:
         if 0 <= t - sh < 0.35:
             amp = 16 * (1 - (t - sh) / 0.35)
@@ -775,7 +783,7 @@ def frame(i):
     img = zoom(img, punch if (dx == 0 and dy == 0) else max(punch, 1.03), dx, dy)
     img = rgb_split(img, glitch)
     # flash on scene cuts and on the "1 ghanta" reveal
-    flashes = [s[1] for s in SCENES[1:]] + [fl + PH["flow"][2][0] + 0.15]
+    flashes = [s[1] for s in SCENES[1:]] + [h + 0.15 for h in hit_times()]
     fa = max([0] + [0.55 * (1 - (t - f) / 0.25) for f in flashes if 0 <= t - f < 0.25])
     if fa > 0:
         img.alpha_composite(Image.new("RGBA", (W, H), (255, 255, 255, int(255 * fa))))
@@ -858,15 +866,14 @@ def sfx(n, rng):
         seg = np.arange(L) / SR
         f = 900 + 700 * np.exp(-seg * 40)
         out[s0:s0 + L] += 0.16 * np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-seg * 45)
-    fl = [s for s in SCENES if s[0] == "flow"][0][1]  # riser into the reveal + impact
-    hit = fl + PH["flow"][2][0]
-    L = int(1.0 * SR)
-    s0 = int((hit - 1.0) * SR)
-    seg = np.arange(L) / SR
-    out[s0:s0 + L] += 0.12 * (seg / 1.0) ** 2 * np.sin(2 * np.pi * np.cumsum(300 + 900 * seg) / SR)
-    L = int(0.6 * SR)
-    seg = np.arange(L) / SR
-    out[int(hit * SR):int(hit * SR) + L] += 0.6 * np.sin(2 * np.pi * np.cumsum(45 + 60 * np.exp(-seg * 20)) / SR) * np.exp(-seg * 6)
+    for hit in hit_times():  # riser into each big reveal + impact
+        L = int(1.0 * SR)
+        s0 = max(0, int((hit - 1.0) * SR))
+        seg = np.arange(L) / SR
+        out[s0:s0 + L] += 0.12 * (seg / 1.0) ** 2 * np.sin(2 * np.pi * np.cumsum(300 + 900 * seg) / SR)
+        L = int(0.6 * SR)
+        seg = np.arange(L) / SR
+        out[int(hit * SR):int(hit * SR) + L] += 0.6 * np.sin(2 * np.pi * np.cumsum(45 + 60 * np.exp(-seg * 20)) / SR) * np.exp(-seg * 6)
     return out
 
 
