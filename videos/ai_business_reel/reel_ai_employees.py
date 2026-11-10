@@ -3,7 +3,7 @@
 Re-uses the engine in make_reel.py (effects, karaoke subtitles, TTE decrypt, music,
 sfx, ElevenLabs --voice-dir loading) and only defines new scenes + script.
 
-    python reel_ai_employees.py --voice-dir voice_en -o ai_employees.mp4
+    python reel_ai_employees.py --voice-dir voice_en_kokoro --tempo 1.0 -o ai_employees.mp4
 """
 import math
 import sys
@@ -287,5 +287,5 @@ m.HIT_FN = hits
 
 if __name__ == "__main__":
     if "--voice-dir" not in sys.argv:
-        sys.argv += ["--voice-dir", "voice_en"]
+        sys.argv += ["--voice-dir", "voice_en_kokoro", "--tempo", "1.0"]
     m.main()
