@@ -1,0 +1,9 @@
+Date,Time (IST),What was done,How (tool / method),Result / link
+2026-11-10,21:43,Hindi reel scheduled to Instagram + YouTube,Metricool createScheduledPost,Metricool post 423345532
+2026-11-10,21:51,Asked owner 4 setup questions,Claude,"niche=general, 1 test video, B-roll=Higgsfield, approval=drafts"
+2026-11-10,21:55,Requested kie.ai key for Higgsfield B-roll,Secure credential form,Declined -> motion-graphics B-roll
+2026-11-10,21:58,Daily routine calendar blocks,Calendar connector needs re-login -> .ics,business_os/client_engine_calendar.ics
+2026-11-10,22:00,3 Gmail templates,Gmail drafts,Outreach / Follow-up / Proposal (not sent)
+2026-11-10,22:10,Google Sheet plan + CRM + content calendar,openpyxl -> Google Drive,Sheet 17jXDBZBCdSX6w84Q2YBtIeBWAOuQ2j3rXihqAqoKhhw
+2026-11-10,22:45,"Video 1 '5 AI Employees' (48s, English, dark humour)","Kokoro am_michael voice + reel_ai_employees.py",videos/ai_business_reel/ai_employees.mp4
+2026-11-10,22:07,"Metricool DRAFT: IG Reel + FB Reel + YT Short for 11 Nov 08:00 IST",Metricool createScheduledPost draft=true,Metricool post 423390436 (needs approval)
