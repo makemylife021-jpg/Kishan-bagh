@@ -1,9 +1,14 @@
-"""30-second vertical reel: "Claude + Google Sheets + Canva = your business team".
+"""~30-second vertical reel: "Claude + Google Sheets + Canva = your business team".
 
-Renders 1080x1920 @ 30 fps frame by frame with Pillow, generates its own
-music bed + sound effects with numpy, and muxes everything with ffmpeg.
+* Hindi voice-over: Kokoro TTS (open source, runs offline; model files from
+  github.com/thewh1teagle/kokoro-onnx releases) -> scene lengths follow the voice.
+* Text effect: terminaltexteffects' Decrypt effect, parsed from its ANSI frames.
+* Word-by-word karaoke subtitles, glitch/RGB-split slide transitions, zoom
+  punches, camera shake, flashes, vignette + film grain.
+* Generated music bed that ducks under the voice, whooshes, pops, riser + impact.
 
-    python videos/ai_business_reel/make_reel.py  [-o out.mp4]
+    pip install kokoro-onnx soundfile terminaltexteffects pillow numpy   # + ffmpeg
+    python make_reel.py --models <dir with kokoro-v1.0.onnx, voices-v1.0.bin> -o out.mp4
 """
 import argparse
 import math
@@ -14,8 +19,7 @@ import wave
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-W, H, FPS, DUR = 1080, 1920, 30, 30.0
-NF = int(FPS * DUR)
+W, H, FPS = 1080, 1920, 30
 FD = "/usr/share/fonts/opentype/inter/"
 _fc = {}
 
@@ -64,17 +68,7 @@ SHEETS = hexc("1FA463")
 CANVA = hexc("8B3DFF")
 CANVA2 = hexc("00C4CC")
 
-# ---------------------------------------------------------------- scenes
-SCENES = [  # (name, start, end)
-    ("hook", 0.0, 3.2),
-    ("claude", 3.2, 9.4),
-    ("sheets", 9.4, 15.6),
-    ("canva", 15.6, 21.8),
-    ("flow", 21.8, 26.4),
-    ("cta", 26.4, 30.0),
-]
-TRANS = 0.35  # seconds of slide transition into each scene
-POPS = []  # sfx times, filled while scenes are defined
+TRANS = 0.35  # seconds of slide/glitch transition into each scene
 
 
 def gradient_bg(c1, c2):
@@ -212,49 +206,83 @@ def scene_header(base, t, num, label, col, title, subtitle=None):
         text(base, subtitle, W / 2, 445 + (1 - p3) * 40, 40, MUTED, alpha=p3, weight="Medium")
 
 
-def caption_bar(base, t, s, start, col=YELLOW):
-    p = out_back(prog(t, start, 0.45))
-    if p <= 0:
-        return
-    f = font(50, "ExtraBold")
-    w = int(f.getlength(s) + 80)
-    bar = rrect((w, 110), 55, col)
-    paste(base, bar, W / 2, 1690, alpha=clamp(p), scale=0.85 + 0.15 * p)
-    text(base, s, W / 2, 1690, 50, hexc("111111"), alpha=clamp(p), scale=0.85 + 0.15 * p, weight="ExtraBold")
-
-
 def pop(t):
     POPS.append(t)
     return t
 
 
+# ---------------------------------------------------------------- terminaltexteffects (TTE) decrypt
+MONO = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+_tte = {}
+
+
+def tte_frames(s):
+    """Run terminaltexteffects' Decrypt effect and parse each ANSI frame into [(char, rgb)]."""
+    if s not in _tte:
+        import re
+        from terminaltexteffects.effects.effect_decrypt import Decrypt
+        from terminaltexteffects.utils.graphics import Color
+
+        eff = Decrypt(s)
+        eff.effect_config.final_gradient_stops = (Color("FFD84D"), Color("FFFFFF"))
+        eff.effect_config.typing_speed = 2
+        pat = re.compile(r"\x1b\[38;2;(\d+);(\d+);(\d+)m(.)\x1b\[0m|(.)")
+        frames = []
+        for fr in eff:
+            row = []
+            for m in pat.finditer(fr.split("\n")[-1]):
+                if m.group(4) is not None:
+                    row.append((m.group(4), (int(m.group(1)), int(m.group(2)), int(m.group(3)), 255)))
+                else:
+                    row.append((m.group(5), (255, 255, 255, 0)))
+            frames.append(row)
+        _tte[s] = frames
+    return _tte[s]
+
+
+def tte_text(base, s, cx, cy, size, p, alpha=1.0):
+    """Draw the TTE decrypt animation of `s` at progress p (0..1)."""
+    if p <= 0:
+        return
+    frames = tte_frames(s)
+    row = frames[min(len(frames) - 1, int(p * (len(frames) - 1)))]
+    f = ImageFont.truetype(MONO, size)
+    adv = f.getlength("M")
+    x0 = cx - adv * len(s) / 2
+    d = ImageDraw.Draw(base)
+    for i, (ch, col) in enumerate(row):
+        if ch.strip() and col[3]:
+            # soft glow
+            d.text((x0 + i * adv + adv / 2, cy), ch, font=f, anchor="mm",
+                   fill=(col[0], col[1], col[2], int(255 * alpha)))
+
+
 # ---------------------------------------------------------------- scene: hook
 def s_hook(base, t):
+    ph = PH["hook"]
+    swap = ph[1][0] - 0.1  # "Ab nahi" starts
     lines = [("Business ka", 0.0, WHITE), ("saara kaam", 0.35, WHITE), ("AKELE?", 0.7, YELLOW)]
-    out = out_cubic(prog(t, 1.55, 0.3))
+    out = out_cubic(prog(t, swap - 0.2, 0.3))
     for i, (s, st, col) in enumerate(lines):
         p = out_back(prog(t, st, 0.4))
         size = 150 if i == 2 else 110
         y = 640 + i * 180 - out * 300
         text(base, s, W / 2, y, size, col, alpha=clamp(p) * (1 - out), scale=0.6 + 0.4 * p, weight="Black",
              rot=(-3 if i == 2 else 0))
-    if t > 1.7:
-        p = out_back(prog(t, 1.75, 0.45))
-        text(base, "Ab nahi.", W / 2, 700, 120, WHITE, alpha=clamp(p), scale=0.7 + 0.3 * p, weight="Black")
-        p2 = out_cubic(prog(t, 2.05, 0.4))
+    if t > swap:
+        tte_text(base, "AB NAHI.", W / 2, 700, 130, prog(t, swap, 0.9))
+        st2 = ph[2][0]
+        p2 = out_cubic(prog(t, st2, 0.4))
         text(base, "Ye 3 AI tools", W / 2, 880 + (1 - p2) * 40, 78, YELLOW, alpha=p2, weight="ExtraBold")
         text(base, "aapki team ban jaayenge", W / 2, 980 + (1 - p2) * 40, 58, WHITE, alpha=p2, weight="SemiBold")
-        # three tool dots
         for i, (col, name) in enumerate([(CLAUDE, "Claude"), (SHEETS, "Sheets"), (CANVA, "Canva")]):
-            pp = out_back(prog(t, 2.3 + i * 0.15, 0.4))
+            pp = out_back(prog(t, st2 + 0.3 + i * 0.15, 0.4))
             cx = W / 2 + (i - 1) * 300
-            dot = rrect((240, 96), 48, col)
-            paste(base, dot, cx, 1220, alpha=clamp(pp), scale=0.5 + 0.5 * pp)
+            paste(base, rrect((240, 96), 48, col), cx, 1220, alpha=clamp(pp), scale=0.5 + 0.5 * pp)
             text(base, name, cx, 1220, 44, WHITE, alpha=clamp(pp), scale=0.5 + 0.5 * pp, weight="ExtraBold")
-        # bouncing arrow
-        if t > 2.6:
+        if t > st2 + 0.8:
             yy = 1420 + 18 * math.sin(t * 9)
-            text(base, "↓", W / 2, yy, 110, YELLOW, alpha=out_cubic(prog(t, 2.6, 0.3)), weight="Black")
+            text(base, "↓", W / 2, yy, 110, YELLOW, alpha=out_cubic(prog(t, st2 + 0.8, 0.3)), weight="Black")
 
 
 # ---------------------------------------------------------------- scene: claude
@@ -338,7 +366,6 @@ def s_claude(base, t):
         check(d, x0 + 75, y0 + ch - 103, 34, WHITE)
         d.text((x0 + 130, y0 + ch - 85), "5 second", font=font(36, "Bold"), fill=WHITE, anchor="lm")
     base.alpha_composite(lay)
-    caption_bar(base, t, "Ghanton ka likhna, seconds mein", 4.9)
 
 
 # ---------------------------------------------------------------- scene: sheets
@@ -397,7 +424,6 @@ def s_sheets(base, t):
         cnt = int(18450 * out_cubic(prog(t, 3.4, 1.0)))
         d.text((x0 + cw - 50, ty + 45), f"₹{cnt:,}", font=font(50, "Black"), fill=hexc("137333"), anchor="rm")
     base.alpha_composite(lay)
-    caption_bar(base, t, "Calculator band. Galti zero.", 4.6)
 
 
 # ---------------------------------------------------------------- scene: canva
@@ -457,7 +483,6 @@ def s_canva(base, t):
         x = 200 + pc * 680
         y = 1500 - math.sin(pc * math.pi) * 250
         text(base, "✦", x, y, 70, YELLOW, alpha=1 - prog(t, 3.8, 0.3), rot=t * 90, weight="Black")
-    caption_bar(base, t, "Pro design, 2 minute mein", 4.6)
 
 
 # ---------------------------------------------------------------- scene: flow
@@ -476,32 +501,30 @@ NODES = [node("Claude", "content likhta hai", CLAUDE), node("Sheets", "hisaab ra
 
 
 def s_flow(base, t):
-    p = out_cubic(prog(t, 0.05, 0.4))
-    text(base, "Teeno saath =", W / 2, 260 + (1 - p) * 40, 70, WHITE, alpha=p, weight="Black")
-    text(base, "Aapki AI Team", W / 2, 360 + (1 - p) * 40, 84, YELLOW, alpha=p, weight="Black")
+    ph = PH["flow"]
+    tte_text(base, "AAPKI AI TEAM", W / 2, 330, 84, prog(t, 0.1, 1.3))
     for i, nd in enumerate(NODES):
         pn = out_back(prog(t, 0.35 + i * 0.3, 0.45))
-        y = 590 + i * 250
+        y = 560 + i * 230
         paste(base, nd, W / 2 + (1 - clamp(pn)) * (-300 if i % 2 == 0 else 300), y, alpha=clamp(pn))
         if i < 2:
             pa = out_cubic(prog(t, 0.6 + i * 0.3, 0.3))
             if pa > 0:
                 d = ImageDraw.Draw(base)
-                d.line([W / 2, y + 90, W / 2, y + 90 + 70 * pa], fill=YELLOW, width=8)
+                d.line([W / 2, y + 90, W / 2, y + 90 + 55 * pa], fill=YELLOW, width=8)
                 if pa > 0.9:
-                    d.polygon([(W / 2 - 18, y + 150), (W / 2 + 18, y + 150), (W / 2, y + 172)], fill=YELLOW)
-    ps = out_back(prog(t, 1.8, 0.5))
+                    d.polygon([(W / 2 - 18, y + 132), (W / 2 + 18, y + 132), (W / 2, y + 152)], fill=YELLOW)
+    ps = out_back(prog(t, ph[1][0], 0.5))
     if ps > 0:
-        card = rrect((900, 300), 50, hexc("FFD84D"))
-        paste(base, card, W / 2, 1480, alpha=clamp(ps), scale=0.7 + 0.3 * ps)
         sc = 0.7 + 0.3 * ps
-        text(base, "8 ghante ka kaam", W / 2, 1420, 62, hexc("1A1035"), alpha=clamp(ps), scale=sc, weight="ExtraBold")
-        if t > 2.4:
-            ws = out_cubic(prog(t, 2.4, 0.25))
-            d = ImageDraw.Draw(base)
-            d.line([W / 2 - 250, 1420, W / 2 - 250 + 500 * ws, 1420], fill=hexc("E0245E"), width=9)
-        pz = out_back(prog(t, 2.6, 0.45))
-        text(base, "→ sirf 1 ghanta", W / 2, 1530, 84, hexc("1A1035"), alpha=clamp(pz), scale=0.6 + 0.4 * pz, weight="Black")
+        paste(base, rrect((900, 280), 50, hexc("FFD84D")), W / 2, 1380, alpha=clamp(ps), scale=sc)
+        text(base, "8 ghante ka kaam", W / 2, 1325, 62, hexc("1A1035"), alpha=clamp(ps), scale=sc, weight="ExtraBold")
+        strike = ph[2][0]
+        if t > strike:
+            ws = out_cubic(prog(t, strike, 0.25))
+            ImageDraw.Draw(base).line([W / 2 - 250, 1325, W / 2 - 250 + 500 * ws, 1325], fill=hexc("E0245E"), width=9)
+        pz = out_back(prog(t, strike + 0.15, 0.45))
+        text(base, "→ sirf 1 ghanta", W / 2, 1430, 84, hexc("1A1035"), alpha=clamp(pz), scale=0.6 + 0.4 * pz, weight="Black")
 
 
 # ---------------------------------------------------------------- scene: cta
@@ -523,6 +546,164 @@ def s_cta(base, t):
 
 RENDER = {"hook": s_hook, "claude": s_claude, "sheets": s_sheets, "canva": s_canva, "flow": s_flow, "cta": s_cta}
 
+# ---------------------------------------------------------------- voice-over script
+# (Hindi text spoken by Kokoro TTS, Hinglish subtitle shown on screen)
+VOICE = {
+    "hook": [("सारा काम अकेले?", "Saara kaam akele?"), ("अब नहीं!", "Ab nahi!"),
+             ("ये तीन एआई टूल्स, आपकी टीम बनेंगे।", "Ye 3 AI tools aapki team banenge")],
+    "claude": [("पहला, क्लॉड।", "Pehla: Claude"), ("कैप्शन, रिप्लाई, प्लान।", "Captions, replies, plans"),
+               ("घंटों का लिखना, सेकंडों में।", "Ghanton ka likhna, seconds mein")],
+    "sheets": [("दूसरा, गूगल शीट्स।", "Doosra: Google Sheets"), ("ऑर्डर, स्टॉक, पेमेंट।", "Orders, stock, payment"),
+               ("सारा हिसाब, अपने आप।", "Saara hisaab, apne aap")],
+    "canva": [("तीसरा, कैनवा।", "Teesra: Canva"), ("पोस्ट, फ्लायर, रील।", "Post, flyer, reel"),
+              ("प्रो डिज़ाइन, दो मिनट में।", "Pro design, 2 minute mein")],
+    "flow": [("तीनों साथ मिलें, तो", "Teeno saath milein, to"), ("आठ घंटे का काम,", "8 ghante ka kaam"),
+             ("सिर्फ़ एक घंटे में!", "sirf 1 ghante mein!")],
+    "cta": [("ऐसी और ट्रिक्स के लिए,", "Aisi aur tricks ke liye"), ("फॉलो करें, और सेव करें!", "FOLLOW karein, SAVE karein!")],
+}
+MIN_DUR = {"hook": 3.6, "claude": 5.6, "sheets": 5.2, "canva": 5.0, "flow": 3.4, "cta": 3.2}
+VOICE_DELAY, GAP, TAIL = 0.25, 0.12, 0.35
+SR = 44100
+PH = {}  # scene -> [(start, end)] of each spoken phrase, scene-local seconds
+SUBS = []  # (global start, global end, subtitle text)
+SCENES, POPS = [], []
+DUR, NF = 30.0, 900
+
+
+def synth_phrases(model_dir, voice, speed):
+    """Kokoro TTS (open-source, offline). Returns {scene: [mono float32 @ SR per phrase]}."""
+    from kokoro_onnx import Kokoro
+
+    k = Kokoro(os.path.join(model_dir, "kokoro-v1.0.onnx"), os.path.join(model_dir, "voices-v1.0.bin"))
+    out = {}
+    for sc, items in VOICE.items():
+        out[sc] = []
+        for hi, _ in items:
+            a, sr = k.create(hi, voice=voice, speed=speed, lang="hi")
+            a = np.asarray(a, dtype=np.float64)
+            # trim leading/trailing silence
+            nz = np.where(np.abs(a) > 0.01)[0]
+            if len(nz):
+                a = a[max(0, nz[0] - int(0.02 * sr)): nz[-1] + int(0.05 * sr)]
+            x_new = np.arange(int(len(a) * SR / sr)) / SR
+            out[sc].append(np.interp(x_new, np.arange(len(a)) / sr, a))
+    return out
+
+
+def build_timeline(clips):
+    """Scene durations follow the voice-over; fills SCENES, PH, SUBS, POPS, DUR, NF."""
+    global DUR, NF
+    t0 = 0.0
+    for name in VOICE:
+        cur, ph = VOICE_DELAY, []
+        for (_, sub), c in zip(VOICE[name], clips[name]):
+            ln = len(c) / SR
+            ph.append((cur, cur + ln))
+            SUBS.append((t0 + cur, t0 + cur + ln, sub))
+            cur += ln + GAP
+        dur = max(MIN_DUR[name], cur - GAP + TAIL)
+        PH[name] = ph
+        SCENES.append((name, t0, t0 + dur))
+        t0 += dur
+    DUR = round(t0 + 0.4, 2)
+    NF = int(DUR * FPS)
+    local = {
+        "hook": [0.0, 0.35, 0.7],
+        "claude": [0.1, 0.45, 2.9, 3.35, 3.8, 4.5],
+        "sheets": [0.1, 0.45, 1.1, 1.52, 1.94, 2.36, 2.78, 3.4],
+        "canva": [0.1, 0.8, 1.15, 1.5],
+        "flow": [0.35, 0.65, 0.95],
+        "cta": [0.05, 0.35, 0.9],
+    }
+    for name, st, _ in SCENES:
+        for lt in local[name]:
+            POPS.append(st + lt)
+    POPS.append(SCENES[0][1] + PH["hook"][1][0])
+    for ps in PH["hook"][2:]:
+        for i in range(3):
+            POPS.append(ps[0] + 0.3 + i * 0.15)
+    fl = [s for s in SCENES if s[0] == "flow"][0][1]
+    POPS.extend([fl + PH["flow"][1][0], fl + PH["flow"][2][0]])
+
+
+# ---------------------------------------------------------------- subtitles (word-by-word karaoke)
+def draw_subs(img, t):
+    cur = [s for s in SUBS if s[0] - 0.05 <= t <= s[1] + 0.25]
+    if not cur:
+        return
+    st, en, s = cur[-1]
+    words = s.split()
+    lens = np.cumsum([len(w) + 1 for w in words])
+    frac = clamp((t - st) / max(0.01, en - st))
+    active = int(np.searchsorted(lens / lens[-1], frac, side="right"))
+    active = min(active, len(words) - 1)
+    f = font(64, "Black")
+    space = f.getlength(" ")
+    # wrap into lines
+    lines, line, wsum = [], [], 0
+    for i, w in enumerate(words):
+        wl = f.getlength(w)
+        if line and wsum + space + wl > 940:
+            lines.append(line)
+            line, wsum = [], 0
+        line.append(i)
+        wsum += wl + (space if len(line) > 1 else 0)
+    lines.append(line)
+    pin = out_back(prog(t, st - 0.05, 0.25))
+    d = ImageDraw.Draw(img)
+    y0 = 1700 - (len(lines) - 1) * 42
+    for li, ln in enumerate(lines):
+        total = sum(f.getlength(words[i]) for i in ln) + space * (len(ln) - 1)
+        x = W / 2 - total / 2
+        y = y0 + li * 84 + (1 - clamp(pin)) * 30
+        for i in ln:
+            w = words[i]
+            col = YELLOW if i == active else WHITE
+            if i == active:
+                wl = f.getlength(w)
+                d.rounded_rectangle([x - 12, y - 46, x + wl + 12, y + 46], 18, fill=(0, 0, 0, 150))
+            d.text((x, y), w, font=f, fill=col, anchor="lm", stroke_width=6, stroke_fill=(0, 0, 0, 255))
+            x += f.getlength(w) + space
+
+
+# ---------------------------------------------------------------- finishing effects
+def _vignette():
+    y, x = np.mgrid[0:H, 0:W]
+    r = np.sqrt(((x - W / 2) / (W / 2)) ** 2 + ((y - H / 2) / (H / 2)) ** 2)
+    a = (np.clip(r - 0.75, 0, 1) * 210).astype(np.uint8)
+    lay = np.zeros((H, W, 4), np.uint8)
+    lay[..., 3] = a
+    return Image.fromarray(lay, "RGBA")
+
+
+VIGNETTE = _vignette()
+_rng = np.random.default_rng(7)
+GRAIN = []
+for _ in range(4):
+    g = _rng.integers(0, 255, (H // 2, W // 2), dtype=np.uint8)
+    lay = np.zeros((H // 2, W // 2, 4), np.uint8)
+    lay[..., 0] = lay[..., 1] = lay[..., 2] = g
+    lay[..., 3] = 9
+    GRAIN.append(Image.fromarray(lay, "RGBA").resize((W, H), Image.NEAREST))
+
+
+def rgb_split(img, k):
+    if k < 1:
+        return img
+    r, g, b, a = img.split()
+    r = r.transform(img.size, Image.AFFINE, (1, 0, -k, 0, 1, 0))
+    b = b.transform(img.size, Image.AFFINE, (1, 0, k, 0, 1, 0))
+    return Image.merge("RGBA", (r, g, b, a))
+
+
+def zoom(img, s, dx=0, dy=0):
+    if abs(s - 1) < 1e-3 and not dx and not dy:
+        return img
+    w, h = int(W * s), int(H * s)
+    big = img.resize((w, h), Image.BILINEAR)
+    x, y = (w - W) // 2 + dx, (h - H) // 2 + dy
+    return big.crop((x, y, x + W, y + H))
+
 
 def scene_frame(idx, t_global):
     name, st, en = SCENES[idx]
@@ -534,25 +715,46 @@ def scene_frame(idx, t_global):
 def frame(i):
     t = i / FPS
     idx = max(k for k, s in enumerate(SCENES) if s[1] <= t)
-    st = SCENES[idx][1]
-    if idx > 0 and t - st < TRANS:
-        x = in_out((t - st) / TRANS)
+    name, st, _ = SCENES[idx]
+    lt = t - st
+    glitch = 0
+    if idx > 0 and lt < TRANS:
+        x = in_out(lt / TRANS)
         prev = scene_frame(idx - 1, t)
         cur = scene_frame(idx, t)
-        out = Image.new("RGBA", (W, H))
+        img = Image.new("RGBA", (W, H))
         off = int(H * x)
-        out.paste(prev.crop((0, off, W, H)), (0, 0))  # previous scene slides up
+        img.paste(prev.crop((0, off, W, H)), (0, 0))
         if off > 0:
-            out.paste(cur.crop((0, 0, W, off)), (0, H - off))  # next scene follows
-        img = out
+            img.paste(cur.crop((0, 0, W, off)), (0, H - off))
+        glitch = 22 * math.sin(math.pi * x)
     else:
         img = scene_frame(idx, t)
-    # top progress bar + brand
+    # zoom punch after each cut + shake on "AKELE?" and on the strike-through
+    punch = 1 + 0.06 * (1 - out_cubic(prog(lt, TRANS if idx else 0, 0.45)))
+    dx = dy = 0
+    shakes = [SCENES[0][1] + 0.7]
+    fl = [s for s in SCENES if s[0] == "flow"][0][1]
+    shakes.append(fl + PH["flow"][2][0])
+    for sh in shakes:
+        if 0 <= t - sh < 0.35:
+            amp = 16 * (1 - (t - sh) / 0.35)
+            dx += int(amp * math.sin(t * 90))
+            dy += int(amp * math.cos(t * 77))
+    img = zoom(img, punch if (dx == 0 and dy == 0) else max(punch, 1.03), dx, dy)
+    img = rgb_split(img, glitch)
+    # flash on scene cuts and on the "1 ghanta" reveal
+    flashes = [s[1] for s in SCENES[1:]] + [fl + PH["flow"][2][0] + 0.15]
+    fa = max([0] + [0.55 * (1 - (t - f) / 0.25) for f in flashes if 0 <= t - f < 0.25])
+    if fa > 0:
+        img.alpha_composite(Image.new("RGBA", (W, H), (255, 255, 255, int(255 * fa))))
+    img.alpha_composite(VIGNETTE)
+    img.alpha_composite(GRAIN[(i // 3) % 4])
+    draw_subs(img, t)
     d = ImageDraw.Draw(img)
     d.rectangle([0, 0, W, 10], fill=(255, 255, 255, 40))
     d.rectangle([0, 0, int(W * t / DUR), 10], fill=YELLOW)
-    d.text((W / 2, 1850), "@kishanbagh", font=font(32, "SemiBold"), fill=hexc("FFFFFF", 120), anchor="mm")
-    # fade in/out
+    d.text((W / 2, 1855), "@kishanbagh", font=font(32, "SemiBold"), fill=hexc("FFFFFF", 120), anchor="mm")
     fade = min(1, t / 0.25, (DUR - t) / 0.4)
     if fade < 1:
         img = Image.blend(Image.new("RGBA", (W, H), (0, 0, 0, 255)), img, max(0, fade))
@@ -560,19 +762,12 @@ def frame(i):
 
 
 # ---------------------------------------------------------------- audio
-SR = 44100
-
-
-def make_audio(path):
-    n = int(SR * DUR)
+def music(n, tt, rng):
     mix = np.zeros(n)
-    tt = np.arange(n) / SR
     bpm = 112
     beat = 60 / bpm
-    # chords: Am F C G (one bar = 4 beats each)
     chords = [[220.0, 261.63, 329.63], [174.61, 220.0, 261.63], [196.0, 261.63, 329.63], [196.0, 246.94, 293.66]]
     bar = 4 * beat
-    pad = np.zeros(n)
     for b in range(int(DUR / bar) + 1):
         s0 = int(b * bar * SR)
         s1 = min(n, int((b + 1) * bar * SR))
@@ -582,105 +777,114 @@ def make_audio(path):
         env = np.minimum(1, seg / 0.3) * np.minimum(1, (bar - seg) / 0.3)
         for f in chords[b % 4]:
             for det in (0.997, 1.003):
-                pad[s0:s1] += 0.05 * env * np.sin(2 * np.pi * f * det * seg)
-        # bass
-        bf = chords[b % 4][0] / 2
-        pad[s0:s1] += 0.12 * env * np.sin(2 * np.pi * bf * seg)
-    mix += pad
-    # arp pluck on 8ths
+                mix[s0:s1] += 0.05 * env * np.sin(2 * np.pi * f * det * seg)
+        mix[s0:s1] += 0.12 * env * np.sin(2 * np.pi * chords[b % 4][0] / 2 * seg)
     for k in range(int(DUR / (beat / 2))):
         s0 = int(k * beat / 2 * SR)
         L = int(0.25 * SR)
         if s0 + L >= n:
             break
-        ch = chords[int(k * beat / 2 / bar) % 4]
-        f = ch[k % 3] * 2
+        f = chords[int(k * beat / 2 / bar) % 4][k % 3] * 2
         seg = np.arange(L) / SR
         mix[s0:s0 + L] += 0.06 * np.exp(-seg * 14) * np.sin(2 * np.pi * f * seg)
-    drums_start = 3.2  # drop when the first tool scene starts
-    rng = np.random.default_rng(1)
+    drums_start = SCENES[1][1]
     for k in range(int(DUR / beat)):
         tb = k * beat
         if tb >= DUR - 0.5:
             break
         s0 = int(tb * SR)
         if tb >= drums_start or k % 2 == 0:
-            L = int(0.35 * SR)
+            L = min(int(0.35 * SR), n - s0)
             seg = np.arange(L) / SR
-            fk = 50 + 90 * np.exp(-seg * 30)
-            kick = np.sin(2 * np.pi * np.cumsum(fk) / SR) * np.exp(-seg * 9)
-            mix[s0:s0 + L] += (0.55 if tb >= drums_start else 0.3) * kick[: max(0, min(L, n - s0))]
+            kick = np.sin(2 * np.pi * np.cumsum(50 + 90 * np.exp(-seg * 30)) / SR) * np.exp(-seg * 9)
+            mix[s0:s0 + L] += (0.55 if tb >= drums_start else 0.3) * kick
         if tb >= drums_start:
-            # hat on off-beat
             h0 = int((tb + beat / 2) * SR)
             L = int(0.06 * SR)
             if h0 + L < n:
                 hat = rng.standard_normal(L) * np.exp(-np.arange(L) / SR * 60)
-                hat = np.diff(np.concatenate([[0], hat]))
-                mix[h0:h0 + L] += 0.08 * hat
-            if k % 2 == 1:
+                mix[h0:h0 + L] += 0.08 * np.diff(np.concatenate([[0], hat]))
+            if k % 2 == 1 and s0 + int(0.18 * SR) < n:
                 L = int(0.18 * SR)
-                cl = rng.standard_normal(L) * np.exp(-np.arange(L) / SR * 22)
-                mix[s0:s0 + L] += 0.12 * cl
-    # whooshes at scene changes
-    for _, st, _ in SCENES[1:]:
+                mix[s0:s0 + L] += 0.12 * rng.standard_normal(L) * np.exp(-np.arange(L) / SR * 22)
+    return mix
+
+
+def sfx(n, rng):
+    out = np.zeros(n)
+    for _, st, _ in SCENES[1:]:  # whooshes
         L = int(0.5 * SR)
         s0 = int((st - 0.25) * SR)
         seg = np.arange(L) / L
         noise = rng.standard_normal(L)
-        # simple moving-average lowpass with sweeping window approximated by blend of two filters
         k1 = np.convolve(noise, np.ones(40) / 40, "same")
-        w_ = (k1 * (1 - seg) + noise * 0.25 * seg) * np.sin(np.pi * seg) ** 2
-        mix[s0:s0 + L] += 0.5 * w_
-    # pops
-    for pt in sorted(set(round(p, 2) for p in POPS)):
+        out[s0:s0 + L] += 0.5 * (k1 * (1 - seg) + noise * 0.25 * seg) * np.sin(np.pi * seg) ** 2
+    for pt in sorted(set(round(p, 2) for p in POPS)):  # pops
         s0 = int(pt * SR)
         L = int(0.09 * SR)
         if s0 + L >= n:
             continue
         seg = np.arange(L) / SR
         f = 900 + 700 * np.exp(-seg * 40)
-        mix[s0:s0 + L] += 0.18 * np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-seg * 45)
-    # master fade + normalize
-    fade = np.minimum(1, np.minimum(tt / 0.3, (DUR - tt) / 1.2))
-    mix *= np.clip(fade, 0, 1)
-    mix = np.tanh(mix * 1.2)
+        out[s0:s0 + L] += 0.16 * np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-seg * 45)
+    fl = [s for s in SCENES if s[0] == "flow"][0][1]  # riser into the reveal + impact
+    hit = fl + PH["flow"][2][0]
+    L = int(1.0 * SR)
+    s0 = int((hit - 1.0) * SR)
+    seg = np.arange(L) / SR
+    out[s0:s0 + L] += 0.12 * (seg / 1.0) ** 2 * np.sin(2 * np.pi * np.cumsum(300 + 900 * seg) / SR)
+    L = int(0.6 * SR)
+    seg = np.arange(L) / SR
+    out[int(hit * SR):int(hit * SR) + L] += 0.6 * np.sin(2 * np.pi * np.cumsum(45 + 60 * np.exp(-seg * 20)) / SR) * np.exp(-seg * 6)
+    return out
+
+
+def make_audio(path, clips):
+    n = int(SR * DUR)
+    tt = np.arange(n) / SR
+    rng = np.random.default_rng(1)
+    voice = np.zeros(n)
+    for name, st, _ in SCENES:
+        for (ps, _), c in zip(PH[name], clips[name]):
+            s0 = int((st + ps) * SR)
+            voice[s0:s0 + len(c)] += c[: n - s0]
+    voice /= max(1e-6, np.max(np.abs(voice))) / 0.9
+    # ducking: music drops while the voice speaks
+    env = np.convolve((np.abs(voice) > 0.02).astype(float), np.ones(int(0.25 * SR)) / int(0.25 * SR), "same")
+    duck = 1 - 0.6 * np.clip(env * 3, 0, 1)
+    bed = music(n, tt, rng) * duck * 0.55 + sfx(n, rng) * 0.6
+    mix = np.tanh((bed + voice) * 1.1)
+    fade = np.clip(np.minimum(tt / 0.3, (DUR - tt) / 1.0), 0, 1)
+    mix *= fade
     mix /= np.max(np.abs(mix)) / 0.89
     data = (mix * 32767).astype(np.int16)
-    stereo = np.repeat(data[:, None], 2, axis=1)
     with wave.open(path, "wb") as wf:
         wf.setnchannels(2)
         wf.setsampwidth(2)
         wf.setframerate(SR)
-        wf.writeframes(stereo.tobytes())
-
-
-# pop timings (element entrances), scene-local -> global
-for name, st, _ in SCENES:
-    local = {
-        "hook": [0.0, 0.35, 0.7, 1.75, 2.3, 2.45, 2.6],
-        "claude": [0.1, 0.45, 2.9, 3.35, 3.8, 4.5, 4.9],
-        "sheets": [0.1, 0.45, 1.1, 1.52, 1.94, 2.36, 2.78, 3.4, 4.6],
-        "canva": [0.1, 0.8, 1.15, 1.5, 4.6],
-        "flow": [0.35, 0.65, 0.95, 1.8, 2.6],
-        "cta": [0.05, 0.35, 0.9],
-    }[name]
-    for lt in local:
-        pop(st + lt)
+        wf.writeframes(np.repeat(data[:, None], 2, axis=1).tobytes())
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("-o", "--out", default="ai_business_reel.mp4")
-    ap.add_argument("--still", type=float, help="render a single frame at this time to PNG and exit")
+    ap.add_argument("--models", default=os.environ.get("KOKORO_DIR", "kokoro"),
+                    help="folder with kokoro-v1.0.onnx and voices-v1.0.bin")
+    ap.add_argument("--voice", default="hm_omega", help="Kokoro Hindi voice: hm_omega, hm_psi, hf_alpha, hf_beta")
+    ap.add_argument("--speed", type=float, default=1.2)
+    ap.add_argument("--still", type=float, nargs="*", help="render frames at these times to PNGs and exit")
     a = ap.parse_args()
-    if a.still is not None:
-        frame(int(a.still * FPS)).save(a.out)
+    clips = synth_phrases(a.models, a.voice, a.speed)
+    build_timeline(clips)
+    print("scenes:", [(n, round(s, 2), round(e, 2)) for n, s, e in SCENES], "total", DUR)
+    if a.still:
+        for s in a.still:
+            frame(int(s * FPS)).save(f"{a.out}_{s}.png")
         return
     wav = a.out + ".wav"
-    make_audio(wav)
+    make_audio(wav, clips)
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
-           "-r", str(FPS), "-i", "-", "-i", wav, "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+           "-r", str(FPS), "-i", "-", "-i", wav, "-c:v", "libx264", "-preset", "medium", "-crf", "21",
            "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-shortest", a.out]
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     for i in range(NF):
