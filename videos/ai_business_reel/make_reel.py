@@ -550,19 +550,19 @@ RENDER = {"hook": s_hook, "claude": s_claude, "sheets": s_sheets, "canva": s_can
 # (Hindi text spoken by Kokoro TTS, Hinglish subtitle shown on screen)
 VOICE = {
     "hook": [("सारा काम अकेले?", "Saara kaam akele?"), ("अब नहीं!", "Ab nahi!"),
-             ("ये तीन एआई टूल्स, आपकी टीम बनेंगे।", "Ye 3 AI tools aapki team banenge")],
-    "claude": [("पहला, क्लॉड।", "Pehla: Claude"), ("कैप्शन, रिप्लाई, प्लान।", "Captions, replies, plans"),
-               ("घंटों का लिखना, सेकंडों में।", "Ghanton ka likhna, seconds mein")],
-    "sheets": [("दूसरा, गूगल शीट्स।", "Doosra: Google Sheets"), ("ऑर्डर, स्टॉक, पेमेंट।", "Orders, stock, payment"),
-               ("सारा हिसाब, अपने आप।", "Saara hisaab, apne aap")],
-    "canva": [("तीसरा, कैनवा।", "Teesra: Canva"), ("पोस्ट, फ्लायर, रील।", "Post, flyer, reel"),
-              ("प्रो डिज़ाइन, दो मिनट में।", "Pro design, 2 minute mein")],
-    "flow": [("तीनों साथ मिलें, तो", "Teeno saath milein, to"), ("आठ घंटे का काम,", "8 ghante ka kaam"),
+             ("ये तीन AI tools आपकी टीम बनेंगे।", "Ye 3 AI tools aapki team banenge")],
+    "claude": [("पहला है Claude!", "Pehla hai Claude!"), ("कैप्शन रिप्लाई और प्लान।", "Caption, reply aur plan"),
+               ("घंटों का लिखना सेकंडों में।", "Ghanton ka likhna, seconds mein")],
+    "sheets": [("दूसरा है Google Sheets!", "Doosra hai Google Sheets!"), ("ऑर्डर स्टॉक और पेमेंट।", "Order, stock aur payment"),
+               ("सारा हिसाब अपने आप।", "Saara hisaab apne aap")],
+    "canva": [("तीसरा है Canva!", "Teesra hai Canva!"), ("पोस्ट फ्लायर और रील।", "Post, flyer aur reel"),
+              ("प्रो डिज़ाइन सिर्फ़ दो मिनट में।", "Pro design, sirf 2 minute mein")],
+    "flow": [("तीनों साथ मिलें तो...", "Teeno saath milein to..."), ("आठ घंटे का काम...", "8 ghante ka kaam..."),
              ("सिर्फ़ एक घंटे में!", "sirf 1 ghante mein!")],
-    "cta": [("ऐसी और ट्रिक्स के लिए,", "Aisi aur tricks ke liye"), ("फॉलो करें, और सेव करें!", "FOLLOW karein, SAVE karein!")],
+    "cta": [("ऐसी और AI tricks के लिए...", "Aisi aur AI tricks ke liye..."), ("फॉलो करें और सेव करें!", "FOLLOW karein aur SAVE karein!")],
 }
 MIN_DUR = {"hook": 3.6, "claude": 5.6, "sheets": 5.2, "canva": 5.0, "flow": 3.4, "cta": 3.2}
-VOICE_DELAY, GAP, TAIL = 0.25, 0.12, 0.35
+VOICE_DELAY, GAP, TAIL = 0.2, 0.12, 0.3
 SR = 44100
 PH = {}  # scene -> [(start, end)] of each spoken phrase, scene-local seconds
 SUBS = []  # (global start, global end, subtitle text)
@@ -587,6 +587,37 @@ def synth_phrases(model_dir, voice, speed):
                 a = a[max(0, nz[0] - int(0.02 * sr)): nz[-1] + int(0.05 * sr)]
             x_new = np.arange(int(len(a) * SR / sr)) / SR
             out[sc].append(np.interp(x_new, np.arange(len(a)) / sr, a))
+    return out
+
+
+def load_voice_dir(vdir, tempo=1.0):
+    """Pre-recorded voice-over, one file per scene (<scene>.mp3, e.g. from ElevenLabs).
+    Each take is split into its phrases at the longest pauses, keeping natural timing."""
+    out = {}
+    for sc, items in VOICE.items():
+        raw = subprocess.run(["ffmpeg", "-v", "error", "-i", os.path.join(vdir, sc + ".mp3"), "-f", "f64le",
+                              "-af", f"atempo={tempo}", "-ac", "1", "-ar", str(SR), "-"], capture_output=True, check=True).stdout
+        a = np.frombuffer(raw, dtype=np.float64).copy()
+        hop = int(0.02 * SR)
+        rms = np.array([np.sqrt(np.mean(a[i:i + hop] ** 2)) for i in range(0, len(a) - hop, hop)])
+        voiced = rms > 0.04 * rms.max()
+        idx = np.where(voiced)[0]
+        a = a[max(0, idx[0] * hop - hop): min(len(a), (idx[-1] + 2) * hop)]
+        voiced = voiced[max(0, idx[0] - 1): idx[-1] + 2]
+        runs, i = [], 0
+        while i < len(voiced):  # silent runs inside the take
+            if not voiced[i]:
+                j = i
+                while j < len(voiced) and not voiced[j]:
+                    j += 1
+                if i > 0 and j < len(voiced):
+                    runs.append((j - i, (i + j) // 2))
+                i = j
+            else:
+                i += 1
+        cuts = sorted(m * hop for _, m in sorted(runs, reverse=True)[: len(items) - 1])
+        bounds = [0] + cuts + [len(a)]
+        out[sc] = [a[bounds[k]:bounds[k + 1]] for k in range(len(items))]
     return out
 
 
@@ -872,9 +903,16 @@ def main():
                     help="folder with kokoro-v1.0.onnx and voices-v1.0.bin")
     ap.add_argument("--voice", default="hm_omega", help="Kokoro Hindi voice: hm_omega, hm_psi, hf_alpha, hf_beta")
     ap.add_argument("--speed", type=float, default=1.2)
+    ap.add_argument("--voice-dir", help="folder with hook/claude/sheets/canva/flow/cta .mp3 takes (used instead of Kokoro)")
+    ap.add_argument("--tempo", type=float, default=1.15, help="speed-up for --voice-dir takes (pitch kept)")
     ap.add_argument("--still", type=float, nargs="*", help="render frames at these times to PNGs and exit")
     a = ap.parse_args()
-    clips = synth_phrases(a.models, a.voice, a.speed)
+    global GAP
+    if a.voice_dir:
+        clips = load_voice_dir(a.voice_dir, a.tempo)
+        GAP = 0.0  # phrases already carry their natural pauses
+    else:
+        clips = synth_phrases(a.models, a.voice, a.speed)
     build_timeline(clips)
     print("scenes:", [(n, round(s, 2), round(e, 2)) for n, s, e in SCENES], "total", DUR)
     if a.still:
