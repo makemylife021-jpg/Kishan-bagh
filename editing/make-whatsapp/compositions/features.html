@@ -1,0 +1,53 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: Inter, sans-serif; color: #EEF0F6; }
+    .chap { position: absolute; left: 90px; right: 150px; top: 226px; text-align: center; font: 800 30px/1 Montserrat, sans-serif;
+      letter-spacing: .22em; color: #9AA0B4; }
+    .card { position: absolute; border-radius: 28px; background: #151826; border: 2px solid #262B3F;
+      box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+    .pill { position: absolute; border-radius: 999px; text-align: center; font: 800 34px/1 Montserrat, sans-serif; }
+    .ico { position: absolute; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+      font: 900 40px/1 Montserrat, sans-serif; color: #0A0B12; }
+    .lbl { position: absolute; font: 800 40px/1.1 Montserrat, sans-serif; }
+    .sub { position: absolute; font: 600 30px/1.2 Inter, sans-serif; color: #9AA0B4; }
+    .g { background: #2BE07A; } .p { background: #8B5CF6; color: #fff; }
+
+  </style>
+  <div id="root" data-composition-id="features" data-width="1080" data-height="1920">
+    <div class="card" id="ft0" style="left:120px;top:290px;width:840px;height:124px">
+      <div class="ico g" style="left:22px;top:20px;width:84px;height:84px">✉</div>
+      <div class="lbl" style="left:132px;top:42px;font-size:38px">Messages bhejo</div></div>
+    <div class="card" id="ft1" style="left:120px;top:440px;width:840px;height:124px">
+      <div class="ico p" style="left:22px;top:20px;width:84px;height:84px">T</div>
+      <div class="lbl" style="left:132px;top:42px;font-size:38px">Template messages</div></div>
+    <div class="card" id="ft2" style="left:120px;top:590px;width:840px;height:124px">
+      <div class="ico g" style="left:22px;top:20px;width:84px;height:84px">⇅</div>
+      <div class="lbl" style="left:132px;top:42px;font-size:38px">Media upload / download</div></div>
+    <div class="card" id="ft3" style="left:120px;top:740px;width:840px;height:124px">
+      <div class="ico p" style="left:22px;top:20px;width:84px;height:84px">◉</div>
+      <div class="lbl" style="left:132px;top:42px;font-size:38px">Events monitor</div></div>
+    <div class="card" id="ft4" style="left:120px;top:890px;width:840px;height:124px">
+      <div class="ico g" style="left:22px;top:20px;width:84px;height:84px">☺</div>
+      <div class="lbl" style="left:132px;top:42px;font-size:38px">Business profile update</div></div>
+
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#ft0", { opacity: 0, y: 30 }, { opacity: .3, y: 0, duration: .35, ease: "power3.out" }, 0.0);
+    tl.to("#ft0", { opacity: 1, duration: .2 }, 1.434);
+    tl.to("#ft0", { scale: 1.05, duration: .15, yoyo: true, repeat: 1, ease: "power2.out" }, 1.434);
+    tl.fromTo("#ft1", { opacity: 0, y: 30 }, { opacity: .3, y: 0, duration: .35, ease: "power3.out" }, 0.1);
+    tl.to("#ft1", { opacity: 1, duration: .2 }, 2.188);
+    tl.to("#ft1", { scale: 1.05, duration: .15, yoyo: true, repeat: 1, ease: "power2.out" }, 2.188);
+    tl.fromTo("#ft2", { opacity: 0, y: 30 }, { opacity: .3, y: 0, duration: .35, ease: "power3.out" }, 0.2);
+    tl.to("#ft2", { opacity: 1, duration: .2 }, 4.270);
+    tl.to("#ft2", { scale: 1.05, duration: .15, yoyo: true, repeat: 1, ease: "power2.out" }, 4.270);
+    tl.fromTo("#ft3", { opacity: 0, y: 30 }, { opacity: .3, y: 0, duration: .35, ease: "power3.out" }, 0.3);
+    tl.to("#ft3", { opacity: 1, duration: .2 }, 6.902);
+    tl.to("#ft3", { scale: 1.05, duration: .15, yoyo: true, repeat: 1, ease: "power2.out" }, 6.902);
+    tl.fromTo("#ft4", { opacity: 0, y: 30 }, { opacity: .3, y: 0, duration: .35, ease: "power3.out" }, 0.4);
+    tl.to("#ft4", { opacity: 1, duration: .2 }, 9.602);
+    tl.to("#ft4", { scale: 1.05, duration: .15, yoyo: true, repeat: 1, ease: "power2.out" }, 9.602);
+    window.__timelines["features"] = tl;
+  </script>
+</template>

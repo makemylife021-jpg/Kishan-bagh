@@ -1,0 +1,37 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: Inter, sans-serif; color: #EEF0F6; }
+    .chap { position: absolute; left: 90px; right: 150px; top: 226px; text-align: center; font: 800 30px/1 Montserrat, sans-serif;
+      letter-spacing: .22em; color: #9AA0B4; }
+    .card { position: absolute; border-radius: 28px; background: #151826; border: 2px solid #262B3F;
+      box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+    .pill { position: absolute; border-radius: 999px; text-align: center; font: 800 34px/1 Montserrat, sans-serif; }
+    .ico { position: absolute; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+      font: 900 40px/1 Montserrat, sans-serif; color: #0A0B12; }
+    .lbl { position: absolute; font: 800 40px/1.1 Montserrat, sans-serif; }
+    .sub { position: absolute; font: 600 30px/1.2 Inter, sans-serif; color: #9AA0B4; }
+    .g { background: #2BE07A; } .p { background: #8B5CF6; color: #fff; }
+
+    .tg { width: 260px; height: 220px; }
+    .bar1 { position: absolute; left: 24px; top: 120px; width: 200px; height: 18px; border-radius: 9px; background: #2D3247; }
+    .bar2 { position: absolute; left: 24px; top: 156px; width: 140px; height: 18px; border-radius: 9px; background: #2D3247; }
+  </style>
+  <div id="root" data-composition-id="outro" data-width="1080" data-height="1920">
+    <div class="card tg" id="og0" style="left:120px;top:300px"><div class="ico g" style="left:24px;top:24px;width:64px;height:64px;font-size:30px">WA</div><div class="bar1"></div><div class="bar2"></div></div><div class="card tg" id="og1" style="left:410px;top:300px"><div class="ico p" style="left:24px;top:24px;width:64px;height:64px;font-size:30px">M</div><div class="bar1"></div><div class="bar2"></div></div><div class="card tg" id="og2" style="left:700px;top:300px"><div class="ico g" style="left:24px;top:24px;width:64px;height:64px;font-size:30px">WA</div><div class="bar1"></div><div class="bar2"></div></div><div class="card tg" id="og3" style="left:120px;top:550px"><div class="ico p" style="left:24px;top:24px;width:64px;height:64px;font-size:30px">M</div><div class="bar1"></div><div class="bar2"></div></div><div class="card tg" id="og4" style="left:410px;top:550px"><div class="ico g" style="left:24px;top:24px;width:64px;height:64px;font-size:30px">WA</div><div class="bar1"></div><div class="bar2"></div></div><div class="card tg" id="og5" style="left:700px;top:550px"><div class="ico p" style="left:24px;top:24px;width:64px;height:64px;font-size:30px">M</div><div class="bar1"></div><div class="bar2"></div></div>
+    <div class="pill" id="og-k" style="left:200px;top:820px;width:680px;height:84px;line-height:84px;background:#8B5CF6;color:#fff">1000s OF TEMPLATES</div>
+    <div class="pill" id="og-f" style="left:240px;top:940px;width:600px;height:84px;line-height:78px;border:4px solid #2BE07A;color:#2BE07A">SAVE + FOLLOW</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#og0", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 3.424 - .6 + 0.00);
+    tl.fromTo("#og1", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 3.424 - .6 + 0.08);
+    tl.fromTo("#og2", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 3.424 - .6 + 0.16);
+    tl.fromTo("#og3", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 3.424 - .6 + 0.24);
+    tl.fromTo("#og4", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 3.424 - .6 + 0.32);
+    tl.fromTo("#og5", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 3.424 - .6 + 0.40);
+    tl.fromTo("#og-k", { opacity: 0, scale: .5 }, { opacity: 1, scale: 1, duration: .35, ease: "back.out(2.2)" }, 3.424);
+    tl.fromTo("#og-f", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 6.766);
+    tl.to("#og-f", { scale: 1.06, duration: .3, yoyo: true, repeat: 3, ease: "sine.inOut" }, 6.766 + .5);
+    window.__timelines["outro"] = tl;
+  </script>
+</template>

@@ -1,0 +1,51 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: Inter, sans-serif; color: #EEF0F6; }
+    .chap { position: absolute; left: 90px; right: 150px; top: 226px; text-align: center; font: 800 30px/1 Montserrat, sans-serif;
+      letter-spacing: .22em; color: #9AA0B4; }
+    .card { position: absolute; border-radius: 28px; background: #151826; border: 2px solid #262B3F;
+      box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+    .pill { position: absolute; border-radius: 999px; text-align: center; font: 800 34px/1 Montserrat, sans-serif; }
+    .ico { position: absolute; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+      font: 900 40px/1 Montserrat, sans-serif; color: #0A0B12; }
+    .lbl { position: absolute; font: 800 40px/1.1 Montserrat, sans-serif; }
+    .sub { position: absolute; font: 600 30px/1.2 Inter, sans-serif; color: #9AA0B4; }
+    .g { background: #2BE07A; } .p { background: #8B5CF6; color: #fff; }
+
+    .fld { position: absolute; left: 40px; width: 780px; height: 76px; border-radius: 16px; background: #0E101A; border: 2px solid #2D3247;
+      font: 700 30px/72px Inter, sans-serif; padding-left: 24px; color: #EEF0F6; }
+    .fld span { opacity: 0; }
+    .chk { position: absolute; top: 576px; width: 240px; height: 66px; border-radius: 16px; border: 2px solid #2D3247;
+      font: 700 28px/62px Inter, sans-serif; text-align: center; color: #6B7186; }
+  </style>
+  <div id="root" data-composition-id="setup" data-width="1080" data-height="1920">
+    <div class="card" id="su-panel" style="left:110px;top:280px;width:860px;height:780px">
+      <div style="position:absolute;left:0;right:0;top:0;height:120px;border-bottom:2px solid #262B3F">
+        <div class="ico g" style="left:30px;top:24px;width:72px;height:72px;font-size:30px">WA</div>
+        <div class="lbl" style="left:124px;top:26px;font-size:34px">Watch Events</div>
+        <div class="pill" id="su-inst" style="left:124px;top:70px;width:200px;height:44px;line-height:44px;font-size:28px;background:#8B5CF6;color:#fff">INSTANT</div></div>
+      <div class="pill" id="su-create" style="left:40px;top:150px;width:780px;height:80px;line-height:76px;border:4px solid #2BE07A;color:#2BE07A;font-size:32px">+ Create a webhook</div>
+      <div class="sub" style="left:40px;top:262px">Webhook name</div>
+      <div class="fld" id="su-f1" style="top:300px"><span id="su-name">My WhatsApp hook</span></div>
+      <div class="sub" style="left:40px;top:398px">Connection</div>
+      <div class="fld" id="su-f2" style="top:436px"><span id="su-conn">My WhatsApp connection &#9662;</span></div>
+      <div class="sub" style="left:40px;top:534px">Events</div>
+      <div class="chk" id="su-c1" style="left:40px">&#10003; Messages</div><div class="chk" id="su-c2" style="left:300px">&#10003; Statuses</div>
+      <div class="pill" id="su-save" style="left:520px;top:670px;width:300px;height:80px;line-height:80px;background:#2BE07A;color:#0A0B12">Save</div></div>
+    <div class="pill" id="su-ok" style="left:240px;top:1000px;width:600px;height:80px;line-height:80px;background:#2BE07A;color:#0A0B12;font-size:32px">&#10003; Webhook ready</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#su-panel", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 0);
+    tl.fromTo("#su-inst", { scale: 1 }, { scale: 1.25, duration: .3, yoyo: true, repeat: 1 }, 1.808);
+    tl.fromTo("#su-create", { backgroundColor: "rgba(43,224,122,0)", color: "#2BE07A" }, { backgroundColor: "rgba(43,224,122,1)", color: "#0A0B12", duration: .2 }, 4.372);
+    tl.fromTo("#su-name", { opacity: 0 }, { opacity: 1, duration: .25 }, 6.192);
+    tl.fromTo("#su-f1", { borderColor: "#2D3247" }, { borderColor: "#2BE07A", duration: .2 }, 6.192);
+    tl.fromTo("#su-conn", { opacity: 0 }, { opacity: 1, duration: .25 }, 7.316);
+    tl.fromTo("#su-f2", { borderColor: "#2D3247" }, { borderColor: "#2BE07A", duration: .2 }, 7.316);
+    tl.fromTo(["#su-c1", "#su-c2"], { color: "#6B7186", borderColor: "#2D3247" }, { color: "#2BE07A", borderColor: "#2BE07A", duration: .2, stagger: .25 }, 9.038);
+    tl.fromTo("#su-save", { scale: 1 }, { scale: .9, duration: .12, yoyo: true, repeat: 1 }, 12.064);
+    tl.fromTo("#su-ok", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .35, ease: "back.out(2)" }, 17.252 - .3);
+    window.__timelines["setup"] = tl;
+  </script>
+</template>

@@ -1,0 +1,37 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: Inter, sans-serif; color: #EEF0F6; }
+    .chap { position: absolute; left: 90px; right: 150px; top: 226px; text-align: center; font: 800 30px/1 Montserrat, sans-serif;
+      letter-spacing: .22em; color: #9AA0B4; }
+    .card { position: absolute; border-radius: 28px; background: #151826; border: 2px solid #262B3F;
+      box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+    .pill { position: absolute; border-radius: 999px; text-align: center; font: 800 34px/1 Montserrat, sans-serif; }
+    .ico { position: absolute; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+      font: 900 40px/1 Montserrat, sans-serif; color: #0A0B12; }
+    .lbl { position: absolute; font: 800 40px/1.1 Montserrat, sans-serif; }
+    .sub { position: absolute; font: 600 30px/1.2 Inter, sans-serif; color: #9AA0B4; }
+    .g { background: #2BE07A; } .p { background: #8B5CF6; color: #fff; }
+
+  </style>
+  <div id="root" data-composition-id="coexist" data-width="1080" data-height="1920">
+    <div class="card" id="cx-a" style="left:110px;top:330px;width:380px;height:440px">
+      <div class="ico g" style="left:130px;top:60px;width:120px;height:120px">WA</div>
+      <div class="lbl" style="left:0;right:0;top:220px;text-align:center;font-size:36px">WhatsApp<br>Business App</div></div>
+    <div class="card" id="cx-b" style="left:590px;top:330px;width:380px;height:440px">
+      <div class="ico p" style="left:130px;top:60px;width:120px;height:120px">M</div>
+      <div class="lbl" style="left:0;right:0;top:220px;text-align:center;font-size:36px">Make<br>Cloud app</div></div>
+    <div id="cx-arrow" style="position:absolute;left:470px;top:500px;width:140px;text-align:center;font:900 64px/1 Montserrat,sans-serif;color:#2BE07A">&#8644;</div>
+    <div class="pill" id="cx-mode" style="left:250px;top:820px;width:580px;height:84px;line-height:84px;background:#8B5CF6;color:#fff">COEXISTENCE MODE</div>
+    <div class="pill" id="cx-geo" style="left:250px;top:930px;width:580px;height:76px;line-height:72px;border:4px solid #FFC94D;color:#FFC94D;font-size:30px">CHECK: COUNTRY SUPPORT</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#cx-a", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 0);
+    tl.fromTo("#cx-b", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 0.15);
+    tl.fromTo("#cx-mode", { opacity: 0, scale: .5 }, { opacity: 1, scale: 1, duration: .35, ease: "back.out(2.2)" }, 4.338);
+    tl.fromTo("#cx-arrow", { opacity: 0, scale: .5 }, { opacity: 1, scale: 1, duration: .3, ease: "back.out(2)" }, 7.496 - .1);
+    tl.fromTo("#cx-arrow", { x: -14 }, { x: 14, duration: .4, ease: "sine.inOut", yoyo: true, repeat: 3 }, 7.496 + .2);
+    tl.fromTo("#cx-geo", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 10.946);
+    window.__timelines["coexist"] = tl;
+  </script>
+</template>

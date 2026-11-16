@@ -1,0 +1,41 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: Inter, sans-serif; color: #EEF0F6; }
+    .chap { position: absolute; left: 90px; right: 150px; top: 226px; text-align: center; font: 800 30px/1 Montserrat, sans-serif;
+      letter-spacing: .22em; color: #9AA0B4; }
+    .card { position: absolute; border-radius: 28px; background: #151826; border: 2px solid #262B3F;
+      box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+    .pill { position: absolute; border-radius: 999px; text-align: center; font: 800 34px/1 Montserrat, sans-serif; }
+    .ico { position: absolute; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+      font: 900 40px/1 Montserrat, sans-serif; color: #0A0B12; }
+    .lbl { position: absolute; font: 800 40px/1.1 Montserrat, sans-serif; }
+    .sub { position: absolute; font: 600 30px/1.2 Inter, sans-serif; color: #9AA0B4; }
+    .g { background: #2BE07A; } .p { background: #8B5CF6; color: #fff; }
+
+  </style>
+  <div id="root" data-composition-id="connect" data-width="1080" data-height="1920">
+    <div class="card" id="cn0" style="left:120px;top:300px;width:840px;height:180px">
+      <div class="ico" id="cn0-n" style="left:30px;top:40px;width:100px;height:100px;border-radius:50%;border:5px solid #2BE07A;color:#2BE07A">1</div>
+      <div class="lbl" style="left:160px;top:44px;font-size:40px">Meta Business Suite</div><div class="sub" style="left:160px;top:100px">Business portfolio banao</div></div>
+    <div class="card" id="cn1" style="left:120px;top:520px;width:840px;height:180px">
+      <div class="ico" id="cn1-n" style="left:30px;top:40px;width:100px;height:100px;border-radius:50%;border:5px solid #2BE07A;color:#2BE07A">2</div>
+      <div class="lbl" style="left:160px;top:44px;font-size:40px">WhatsApp Business</div><div class="sub" style="left:160px;top:100px">Account create karo</div></div>
+    <div class="card" id="cn2" style="left:120px;top:740px;width:840px;height:180px">
+      <div class="ico" id="cn2-n" style="left:30px;top:40px;width:100px;height:100px;border-radius:50%;border:5px solid #2BE07A;color:#2BE07A">3</div>
+      <div class="lbl" style="left:160px;top:44px;font-size:40px">Make</div><div class="sub" style="left:160px;top:100px">Connection create karo</div></div>
+
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#cn0", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 0.0);
+    tl.fromTo("#cn1", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 0.1);
+    tl.fromTo("#cn2", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 0.2);
+    tl.fromTo("#cn0-n", { backgroundColor: "rgba(43,224,122,0)", color: "#2BE07A" }, { backgroundColor: "rgba(43,224,122,1)", color: "#0A0B12", duration: .2 }, 3.774);
+    tl.fromTo("#cn0", { borderColor: "#262B3F" }, { borderColor: "#2BE07A", duration: .2 }, 3.774);
+    tl.fromTo("#cn1-n", { backgroundColor: "rgba(43,224,122,0)", color: "#2BE07A" }, { backgroundColor: "rgba(43,224,122,1)", color: "#0A0B12", duration: .2 }, 7.812);
+    tl.fromTo("#cn1", { borderColor: "#262B3F" }, { borderColor: "#2BE07A", duration: .2 }, 7.812);
+    tl.fromTo("#cn2-n", { backgroundColor: "rgba(43,224,122,0)", color: "#2BE07A" }, { backgroundColor: "rgba(43,224,122,1)", color: "#0A0B12", duration: .2 }, 11.130);
+    tl.fromTo("#cn2", { borderColor: "#262B3F" }, { borderColor: "#2BE07A", duration: .2 }, 11.130);
+    window.__timelines["connect"] = tl;
+  </script>
+</template>

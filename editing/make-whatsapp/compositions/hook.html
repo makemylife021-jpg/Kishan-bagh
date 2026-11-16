@@ -1,0 +1,35 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: Inter, sans-serif; color: #EEF0F6; }
+    .chap { position: absolute; left: 90px; right: 150px; top: 226px; text-align: center; font: 800 30px/1 Montserrat, sans-serif;
+      letter-spacing: .22em; color: #9AA0B4; }
+    .card { position: absolute; border-radius: 28px; background: #151826; border: 2px solid #262B3F;
+      box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+    .pill { position: absolute; border-radius: 999px; text-align: center; font: 800 34px/1 Montserrat, sans-serif; }
+    .ico { position: absolute; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+      font: 900 40px/1 Montserrat, sans-serif; color: #0A0B12; }
+    .lbl { position: absolute; font: 800 40px/1.1 Montserrat, sans-serif; }
+    .sub { position: absolute; font: 600 30px/1.2 Inter, sans-serif; color: #9AA0B4; }
+    .g { background: #2BE07A; } .p { background: #8B5CF6; color: #fff; }
+
+  </style>
+  <div id="root" data-composition-id="hook" data-width="1080" data-height="1920">
+    <div class="card" id="hk-wa" style="left:240px;top:300px;width:600px;height:200px">
+      <div class="ico g" style="left:36px;top:46px;width:108px;height:108px">WA</div>
+      <div class="lbl" style="left:170px;top:58px">WhatsApp</div><div class="sub" style="left:170px;top:112px">Business Cloud</div></div>
+    <svg id="hk-link" style="position:absolute;left:520px;top:500px;width:40px;height:200px" viewBox="0 0 40 200">
+      <line id="hk-line" x1="20" y1="10" x2="20" y2="190" stroke="#8B5CF6" stroke-width="8" stroke-linecap="round" stroke-dasharray="14 16"/></svg>
+    <div class="card" id="hk-mk" style="left:240px;top:700px;width:600px;height:200px">
+      <div class="ico p" style="left:36px;top:46px;width:108px;height:108px">M</div>
+      <div class="lbl" style="left:170px;top:58px">Make</div><div class="sub" style="left:170px;top:112px">Automation, no code</div></div>
+    <div class="pill" id="hk-badge" style="left:330px;top:960px;width:420px;height:76px;line-height:76px;background:#2BE07A;color:#0A0B12">NO CODING</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#hk-wa", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 0);
+    tl.fromTo("#hk-mk", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 0.15);
+    tl.fromTo("#hk-line", { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": -300 }, duration: 7.734, ease: "none" }, 0);
+    tl.fromTo("#hk-badge", { opacity: 0, scale: .4 }, { opacity: 1, scale: 1, duration: .35, ease: "back.out(2.5)" }, 5.640);
+    window.__timelines["hook"] = tl;
+  </script>
+</template>

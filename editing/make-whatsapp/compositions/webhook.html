@@ -1,0 +1,39 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: Inter, sans-serif; color: #EEF0F6; }
+    .chap { position: absolute; left: 90px; right: 150px; top: 226px; text-align: center; font: 800 30px/1 Montserrat, sans-serif;
+      letter-spacing: .22em; color: #9AA0B4; }
+    .card { position: absolute; border-radius: 28px; background: #151826; border: 2px solid #262B3F;
+      box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+    .pill { position: absolute; border-radius: 999px; text-align: center; font: 800 34px/1 Montserrat, sans-serif; }
+    .ico { position: absolute; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+      font: 900 40px/1 Montserrat, sans-serif; color: #0A0B12; }
+    .lbl { position: absolute; font: 800 40px/1.1 Montserrat, sans-serif; }
+    .sub { position: absolute; font: 600 30px/1.2 Inter, sans-serif; color: #9AA0B4; }
+    .g { background: #2BE07A; } .p { background: #8B5CF6; color: #fff; }
+
+  </style>
+  <div id="root" data-composition-id="webhook" data-width="1080" data-height="1920">
+    <div class="card" id="wh-msg" style="left:240px;top:290px;width:600px;height:150px">
+      <div class="ico g" style="left:30px;top:33px;width:84px;height:84px">&#9993;</div>
+      <div class="lbl" style="left:140px;top:52px;font-size:40px">Naya message</div></div>
+    <div class="card" id="wh-hook" style="left:240px;top:540px;width:600px;height:150px;border-color:#8B5CF6">
+      <div class="ico p" style="left:30px;top:33px;width:84px;height:84px">&#8634;</div>
+      <div class="lbl" style="left:140px;top:52px;font-size:40px">Webhook</div></div>
+    <div class="card" id="wh-sc" style="left:240px;top:790px;width:600px;height:150px">
+      <div class="ico" id="wh-play" style="left:30px;top:33px;width:84px;height:84px;background:#3A3F52;color:#fff">&#9654;</div>
+      <div class="lbl" style="left:140px;top:52px;font-size:40px">Scenario start</div></div>
+    <div id="wh-dot" style="position:absolute;left:522px;top:440px;width:36px;height:36px;border-radius:50%;background:#2BE07A;box-shadow:0 0 30px #2BE07A;opacity:0"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#wh-msg", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 0);
+    tl.fromTo("#wh-hook", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 0.558);
+    tl.fromTo("#wh-sc", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 0.558 + .2);
+    tl.fromTo("#wh-dot", { opacity: 1, y: 0 }, { opacity: 1, y: 350, duration: .7, ease: "power1.inOut" }, 4.236 - .3);
+    tl.to("#wh-dot", { opacity: 0, duration: .15 }, 4.236 + .4);
+    tl.fromTo("#wh-play", { backgroundColor: "#3A3F52" }, { backgroundColor: "#2BE07A", color: "#0A0B12", duration: .2 }, 4.236 + .4);
+    tl.to("#wh-sc", { scale: 1.06, duration: .18, yoyo: true, repeat: 1, ease: "power2.out" }, 4.236 + .4);
+    window.__timelines["webhook"] = tl;
+  </script>
+</template>

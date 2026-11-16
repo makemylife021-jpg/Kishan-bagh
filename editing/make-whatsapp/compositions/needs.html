@@ -1,0 +1,48 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: Inter, sans-serif; color: #EEF0F6; }
+    .chap { position: absolute; left: 90px; right: 150px; top: 226px; text-align: center; font: 800 30px/1 Montserrat, sans-serif;
+      letter-spacing: .22em; color: #9AA0B4; }
+    .card { position: absolute; border-radius: 28px; background: #151826; border: 2px solid #262B3F;
+      box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+    .pill { position: absolute; border-radius: 999px; text-align: center; font: 800 34px/1 Montserrat, sans-serif; }
+    .ico { position: absolute; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+      font: 900 40px/1 Montserrat, sans-serif; color: #0A0B12; }
+    .lbl { position: absolute; font: 800 40px/1.1 Montserrat, sans-serif; }
+    .sub { position: absolute; font: 600 30px/1.2 Inter, sans-serif; color: #9AA0B4; }
+    .g { background: #2BE07A; } .p { background: #8B5CF6; color: #fff; }
+
+  </style>
+  <div id="root" data-composition-id="needs" data-width="1080" data-height="1920">
+    <div class="card" id="nd0" style="left:120px;top:290px;width:840px;height:124px">
+      <div class="ico g" id="nd0-ok" style="left:22px;top:20px;width:84px;height:84px">&#10003;</div>
+      <div class="lbl" style="left:132px;top:42px;font-size:38px">Facebook account</div></div>
+    <div class="card" id="nd1" style="left:120px;top:440px;width:840px;height:124px">
+      <div class="ico g" id="nd1-ok" style="left:22px;top:20px;width:84px;height:84px">&#10003;</div>
+      <div class="lbl" style="left:132px;top:42px;font-size:38px">Meta Business Suite account</div></div>
+    <div class="card" id="nd2" style="left:120px;top:590px;width:840px;height:124px">
+      <div class="ico g" id="nd2-ok" style="left:22px;top:20px;width:84px;height:84px">&#10003;</div>
+      <div class="lbl" style="left:132px;top:42px;font-size:38px">WhatsApp Business number</div></div>
+    <div class="card" id="nd-warn" style="left:120px;top:770px;width:840px;height:150px;border-color:#FF6B6B">
+      <div class="lbl" style="left:36px;top:34px;font-size:38px;color:#FF8A8A">2-step verification</div>
+      <div class="sub" style="left:36px;top:86px">pehle OFF karo</div>
+      <div id="nd-tog" style="position:absolute;right:36px;top:45px;width:110px;height:60px;border-radius:30px;background:#2BE07A">
+        <div id="nd-knob" style="position:absolute;left:54px;top:6px;width:48px;height:48px;border-radius:50%;background:#fff"></div></div></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#nd0", { opacity: 0, y: 30 }, { opacity: .3, y: 0, duration: .35, ease: "power3.out" }, 0.0);
+    tl.to("#nd0", { opacity: 1, duration: .2 }, 3.540);
+    tl.to("#nd0", { scale: 1.05, duration: .15, yoyo: true, repeat: 1, ease: "power2.out" }, 3.540);
+    tl.fromTo("#nd1", { opacity: 0, y: 30 }, { opacity: .3, y: 0, duration: .35, ease: "power3.out" }, 0.1);
+    tl.to("#nd1", { opacity: 1, duration: .2 }, 4.902);
+    tl.to("#nd1", { scale: 1.05, duration: .15, yoyo: true, repeat: 1, ease: "power2.out" }, 4.902);
+    tl.fromTo("#nd2", { opacity: 0, y: 30 }, { opacity: .3, y: 0, duration: .35, ease: "power3.out" }, 0.2);
+    tl.to("#nd2", { opacity: 1, duration: .2 }, 7.602);
+    tl.to("#nd2", { scale: 1.05, duration: .15, yoyo: true, repeat: 1, ease: "power2.out" }, 7.602);
+    tl.fromTo("#nd-warn", { opacity: 0, y: 40, scale: .92 }, { opacity: 1, y: 0, scale: 1, duration: .38, ease: "back.out(1.8)" }, 11.538 - .2);
+    tl.fromTo("#nd-knob", { x: 0 }, { x: -46, duration: .25, ease: "power2.inOut" }, 11.538 + .6);
+    tl.fromTo("#nd-tog", { backgroundColor: "#2BE07A" }, { backgroundColor: "#3A3F52", duration: .25 }, 11.538 + .6);
+    window.__timelines["needs"] = tl;
+  </script>
+</template>
