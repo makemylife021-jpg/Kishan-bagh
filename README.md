@@ -1,5 +1,10 @@
 # Kishan-bagh
 
+## AI video editing toolkit
+
+FFmpeg, yt-dlp, Whisper, Remotion, Hyperframes and free music/SFX search (Openverse + Freesound).
+See [`editing/README.md`](editing/README.md). Run `bash editing/setup.sh` and then `bash editing/check.sh`.
+
 ## Instagram Reel Autopilot
 
 Fully automatic Instagram video creation and posting:

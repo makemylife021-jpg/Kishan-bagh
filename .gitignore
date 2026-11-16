@@ -2,3 +2,9 @@ out/
 __pycache__/
 *.pyc
 .env
+
+# video editing
+editing/assets/**/*.wav
+editing/hyperframes/renders/
+editing/hyperframes/.hyperframes/
+node_modules/
