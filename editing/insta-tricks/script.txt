@@ -1,0 +1,19 @@
+# Script for "3 hidden Instagram tricks"
+# One segment per paragraph, headed by [scene]. Read it naturally; small changes are fine.
+#   *word*  = keyword: shown huge in lime
+#   ^word   = the moment the on-screen animation fires (not shown to viewers)
+
+[hook]
+Three *hidden* Instagram tricks that most people don't know about.
+
+[trick1]
+Number one. Read messages *secretly*. Open the chat, tap their ^name, and turn off read ^*receipts*. Now they can't see when you've read it.
+
+[trick2]
+Number two. Want your feed in *order*? Tap the Instagram ^logo at the top and choose ^*Following*. Newest posts first, no algorithm.
+
+[trick3]
+Number three. Sent a message with a *typo*? Press and ^hold it, then tap ^*Edit*. You have fifteen ^minutes to fix it.
+
+[outro]
+^*Save* this so you don't forget, and follow for more.

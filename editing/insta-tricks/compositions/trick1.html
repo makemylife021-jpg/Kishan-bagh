@@ -1,0 +1,50 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+
+    .phone { position: absolute; left: 300px; top: 330px; width: 480px; height: 760px; border-radius: 64px;
+      background: #0E0F12; border: 10px solid #2A2D33; box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 0 2px #3A3F47, 0 0 120px rgba(200,255,46,.12);
+      overflow: hidden; font-family: Inter, sans-serif; color: #EDEDED; }
+    .notch { position: absolute; left: 175px; top: 14px; width: 110px; height: 30px; border-radius: 16px; background: #000; }
+    .bar { position: absolute; left: 0; right: 0; top: 60px; height: 70px; padding: 0 26px; display: flex; align-items: center;
+      gap: 16px; font-weight: 700; font-size: 30px; border-bottom: 1px solid #22252B; }
+    .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #8E7CFF, #FF7AB6); flex: none; }
+    .row { position: absolute; left: 18px; right: 18px; height: 74px; border-radius: 18px; padding: 0 20px;
+      display: flex; align-items: center; justify-content: space-between; font-size: 28px; font-weight: 600; }
+    .hl { position: absolute; border-radius: 18px; border: 4px solid #C8FF2E; box-shadow: 0 0 24px rgba(200,255,46,.6); opacity: 0; }
+    .label { position: absolute; left: 0; right: 0; text-align: center; font-family: Montserrat, sans-serif; font-weight: 900;
+      color: #C8FF2E; text-shadow: 0 0 24px rgba(200,255,46,.5); }
+    .tog { position: relative; width: 78px; height: 44px; border-radius: 22px; background: #3A3F47; }
+    .tog i { position: absolute; left: 4px; top: 4px; width: 36px; height: 36px; border-radius: 50%; background: #fff; }
+    #t1-tog { background: #C8FF2E; }
+    #t1-knob { left: 38px; }
+    #t1-seen { position: absolute; left: 0; right: 0; top: 640px; text-align: center; font: 800 30px/1 Inter, sans-serif; color: #FF5B5B; opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="trick1" data-width="1080" data-height="1920">
+    <div class="phone" id="t1-phone">
+      <div class="notch"></div>
+      <div class="bar"><span>&lsaquo;</span><span>Chat details</span></div>
+      <div id="t1-head" class="row" style="top:150px;height:120px;justify-content:flex-start;gap:18px">
+        <div class="avatar" style="width:72px;height:72px"></div><div><div style="font-size:30px;font-weight:800">alex.k</div>
+        <div style="font-size:28px;color:#8A8F98;margin-top:6px">View profile</div></div></div>
+      <div class="row" style="top:300px">Mute messages <span class="tog" id="t1-tog-a"><i></i></span></div>
+      <div class="row" id="t1-rr" style="top:380px">Read receipts <span class="tog on" id="t1-tog"><i id="t1-knob"></i></span></div>
+      <div class="row" style="top:460px">Vanish mode <span style="color:#8A8F98">Off</span></div>
+      <div class="row" style="top:540px">Privacy &amp; safety <span style="color:#8A8F98">&rsaquo;</span></div>
+      <div class="hl" id="t1-hl1" style="left:14px;top:146px;width:432px;height:128px"></div>
+      <div class="hl" id="t1-hl2" style="left:14px;top:376px;width:432px;height:82px"></div>
+      <div id="t1-seen">Seen &#10007;</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#t1-phone", { y: 160, opacity: 0, rotation: 4 }, { y: 0, opacity: 1, rotation: 0, duration: 0.5, ease: "power3.out" }, 0);
+    tl.fromTo("#t1-hl1", { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.2, ease: "power2.out" }, 4.936);
+    tl.to("#t1-hl1", { opacity: 0, duration: 0.2 }, 6.78 - 0.25);
+    tl.fromTo("#t1-hl2", { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.2, ease: "power2.out" }, 6.78 - 0.2);
+    tl.fromTo("#t1-knob", { x: 0 }, { x: -34, duration: 0.22, ease: "power2.inOut" }, 6.78);
+    tl.fromTo("#t1-tog", { backgroundColor: "#C8FF2E" }, { backgroundColor: "#3A3F47", duration: 0.22 }, 6.78);
+    tl.fromTo("#t1-seen", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(2)" }, 6.78 + 0.5);
+    window.__timelines["trick1"] = tl;
+  </script>
+</template>

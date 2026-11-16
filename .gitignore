@@ -8,3 +8,5 @@ editing/assets/**/*.wav
 editing/hyperframes/renders/
 editing/hyperframes/.hyperframes/
 node_modules/
+editing/insta-tricks/.whisper/
+editing/insta-tricks/.hyperframes/

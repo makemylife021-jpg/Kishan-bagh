@@ -1,0 +1,19 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: #07110A; overflow: hidden; }
+    #bg-a { position: absolute; left: -300px; top: -200px; width: 1100px; height: 1100px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(120,190,20,.35), rgba(120,190,20,0) 65%); }
+    #bg-b { position: absolute; left: 400px; top: 1100px; width: 1000px; height: 1000px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(200,255,46,.22), rgba(200,255,46,0) 65%); }
+    #bg-v { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 40%, rgba(0,0,0,.65) 100%); }
+  </style>
+  <div id="root" data-composition-id="bg" data-width="1080" data-height="1920">
+    <div id="bg-a" data-layout-allow-overflow></div><div id="bg-b" data-layout-allow-overflow></div><div id="bg-v"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#bg-a", { x: 0, y: 0 }, { x: 220, y: 160, duration: 40.44, ease: "sine.inOut" }, 0);
+    tl.fromTo("#bg-b", { x: 0, y: 0 }, { x: -260, y: -220, duration: 40.44, ease: "sine.inOut" }, 0);
+    window.__timelines["bg"] = tl;
+  </script>
+</template>

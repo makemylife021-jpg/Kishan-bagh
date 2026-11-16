@@ -1,0 +1,27 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #hook-glow { position: absolute; left: 140px; top: 260px; width: 800px; height: 800px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(200,255,46,.35) 0%, rgba(200,255,46,0) 65%); }
+    #hook-num { position: absolute; left: 0; right: 0; top: 330px; text-align: center; font: 900 500px/1 Montserrat, sans-serif;
+      color: #C8FF2E; text-shadow: 0 0 60px rgba(200,255,46,.6); letter-spacing: -0.05em; }
+    #hook-sub { position: absolute; left: 90px; right: 150px; top: 850px; text-align: center; font: 800 54px/1 Montserrat, sans-serif;
+      color: #fff; letter-spacing: 0.32em; }
+    #hook-tag { position: absolute; left: 90px; right: 150px; top: 920px; text-align: center; font: 900 84px/1 Montserrat, sans-serif;
+      color: #fff; letter-spacing: -0.01em; }
+  </style>
+  <div id="root" data-composition-id="hook" data-width="1080" data-height="1920">
+    <div id="hook-glow"></div>
+    <div id="hook-num">3</div>
+    <div id="hook-tag">HIDDEN TRICKS</div>
+    <div id="hook-sub">INSTAGRAM</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#hook-num", { scale: 0.9, rotation: -4 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2)" }, 0);
+    tl.fromTo("#hook-glow", { scale: 0.7, opacity: 0.4 }, { scale: 1.1, opacity: 1, duration: 4.75, ease: "sine.inOut" }, 0);
+    tl.fromTo("#hook-sub", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, 0.25);
+    tl.fromTo("#hook-tag", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.4);
+    window.__timelines["hook"] = tl;
+  </script>
+</template>
