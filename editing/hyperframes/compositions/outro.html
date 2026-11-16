@@ -1,0 +1,29 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: var(--ink, #1A1423); overflow: hidden; color: #FFF3DF; }
+    #outro-sun { position: absolute; left: 540px; top: 470px; width: 300px; height: 300px; margin: -150px 0 0 -150px;
+      border-radius: 50%; background: radial-gradient(circle at 50% 45%, #FFD166, var(--sun, #FFB627) 60%, #FF8A3D); }
+    #outro-head { position: absolute; left: 100px; right: 160px; top: 700px; text-align: center;
+      font: 400 104px/1.02 "Archivo Black", sans-serif; }
+    #outro-sub { position: absolute; left: 100px; right: 160px; top: 960px; text-align: center;
+      font: 700 44px/1.25 Inter, sans-serif; opacity: 0.8; }
+    #outro-btn { position: absolute; left: 310px; top: 1110px; width: 400px; height: 120px; border-radius: 60px;
+      background: #C2410C; font: 400 54px/120px "Archivo Black", sans-serif; text-align: center; color: #FFF3DF; }
+  </style>
+  <div id="root" data-composition-id="outro" data-width="1080" data-height="1920">
+    <div id="outro-sun"></div>
+    <div id="outro-head"><div id="outro-l1">TRY ONE</div><div id="outro-l2">TOMORROW</div></div>
+    <div id="outro-sub">Follow for more simple habits</div>
+    <div id="outro-btn">FOLLOW</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#outro-sun", { y: 200, scale: 0.5, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.8)" }, 0);
+    tl.fromTo("#outro-l1", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.15);
+    tl.fromTo("#outro-l2", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.25);
+    tl.fromTo("#outro-sub", { opacity: 0 }, { opacity: 0.8, duration: 0.4 }, 0.6);
+    tl.fromTo("#outro-btn", { scale: 0 }, { scale: 1, duration: 0.45, ease: "back.out(2.5)" }, 0.8);
+    tl.to("#outro-btn", { scale: 1.08, duration: 0.35, ease: "sine.inOut", yoyo: true, repeat: 3 }, 1.4);
+    window.__timelines["outro"] = tl;
+  </script>
+</template>

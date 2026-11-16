@@ -1,0 +1,34 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: #CDEBFF; overflow: hidden; color: var(--ink, #1A1423); }
+    #habit1-num { position: absolute; left: 0; right: 0; top: 300px; text-align: center;
+      font: 400 260px/1 "Archivo Black", sans-serif; color: #B8360A; }
+    #habit1-art { position: absolute; left: 330px; top: 610px; width: 400px; height: 336px; }
+    #habit1-head { position: absolute; left: 110px; right: 170px; top: 990px; text-align: center;
+      font: 400 80px/1.05 "Archivo Black", sans-serif; letter-spacing: -0.01em; }
+    #habit1-detail { position: absolute; left: 110px; right: 170px; top: 1180px; text-align: center;
+      font: 700 42px/1.2 Inter, sans-serif; opacity: 0.75; }
+    
+  </style>
+  <div id="root" data-composition-id="habit1" data-width="1080" data-height="1920">
+    <div id="habit1-num">1</div>
+    <svg data-layout-allow-overflow id="habit1-art" viewBox="0 0 500 420">
+      <defs><clipPath id="habit1-cup"><path d="M150 40 L350 40 L320 400 L180 400 Z"/></clipPath></defs>
+      <rect id="habit1-water" x="100" y="400" width="300" height="400" fill="#3BA4F0" clip-path="url(#habit1-cup)"/>
+      <path d="M150 40 L350 40 L320 400 L180 400 Z" fill="none" stroke="#1A1423" stroke-width="14" stroke-linejoin="round"/>
+      <circle id="habit1-drop" cx="250" cy="0" r="18" fill="#3BA4F0"/></svg>
+    <div id="habit1-head"><div id="habit1-h1">WATER BEFORE</div><div id="habit1-h2">YOUR PHONE</div></div>
+    <div id="habit1-detail">One full glass. Then scroll.</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#habit1-num", { scale: 0.4, opacity: 0, rotation: -12 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.5, ease: "back.out(2.2)" }, 0);
+    tl.fromTo("#habit1-art", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+    tl.fromTo("#habit1-h1", { x: -140, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.2);
+    tl.fromTo("#habit1-h2", { x: 140, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.3);
+    tl.fromTo("#habit1-detail", { y: 30, opacity: 0 }, { y: 0, opacity: 0.75, duration: 0.3, ease: "power2.out" }, 0.45);
+    tl.fromTo("#habit1-water", { attr: { y: 400 } }, { attr: { y: 110 }, duration: 1.8, ease: "power1.inOut" }, 0.4);
+    tl.fromTo("#habit1-drop", { attr: { cy: -20 }, opacity: 1 }, { attr: { cy: 160 }, opacity: 0, duration: 0.6, ease: "power2.in" }, 0.3);
+    window.__timelines["habit1"] = tl;
+  </script>
+</template>

@@ -1,0 +1,37 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: #FFE08A; overflow: hidden; color: var(--ink, #1A1423); }
+    #habit2-num { position: absolute; left: 0; right: 0; top: 300px; text-align: center;
+      font: 400 260px/1 "Archivo Black", sans-serif; color: #B8360A; }
+    #habit2-art { position: absolute; left: 330px; top: 610px; width: 400px; height: 336px; }
+    #habit2-head { position: absolute; left: 110px; right: 170px; top: 990px; text-align: center;
+      font: 400 80px/1.05 "Archivo Black", sans-serif; letter-spacing: -0.01em; }
+    #habit2-detail { position: absolute; left: 110px; right: 170px; top: 1180px; text-align: center;
+      font: 700 42px/1.2 Inter, sans-serif; opacity: 0.75; }
+    #habit2-rays { transform-origin: 250px 210px; transform-box: view-box; }
+  </style>
+  <div id="root" data-composition-id="habit2" data-width="1080" data-height="1920">
+    <div id="habit2-num">2</div>
+    <svg data-layout-allow-overflow id="habit2-art" viewBox="0 0 500 420">
+      <g id="habit2-rays" stroke="#FF5A1F" stroke-width="16" stroke-linecap="round">
+        <line x1="250" y1="10" x2="250" y2="55"/><line x1="250" y1="365" x2="250" y2="410"/>
+        <line x1="50" y1="210" x2="95" y2="210"/><line x1="405" y1="210" x2="450" y2="210"/>
+        <line x1="109" y1="69" x2="140" y2="100"/><line x1="360" y1="320" x2="391" y2="351"/>
+        <line x1="391" y1="69" x2="360" y2="100"/><line x1="140" y1="320" x2="109" y2="351"/>
+      </g>
+      <circle id="habit2-core" cx="250" cy="210" r="115" fill="#FF8A3D" stroke="#1A1423" stroke-width="14"/></svg>
+    <div id="habit2-head"><div id="habit2-h1">10 MINUTES</div><div id="habit2-h2">OF SUNLIGHT</div></div>
+    <div id="habit2-detail">It wakes up your brain.</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#habit2-num", { scale: 0.4, opacity: 0, rotation: -12 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.5, ease: "back.out(2.2)" }, 0);
+    tl.fromTo("#habit2-art", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+    tl.fromTo("#habit2-h1", { x: -140, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.2);
+    tl.fromTo("#habit2-h2", { x: 140, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.3);
+    tl.fromTo("#habit2-detail", { y: 30, opacity: 0 }, { y: 0, opacity: 0.75, duration: 0.3, ease: "power2.out" }, 0.45);
+    tl.fromTo("#habit2-rays", { rotation: 0 }, { rotation: 90, duration: 2.95, ease: "none", svgOrigin: "250 210" }, 0);
+    tl.fromTo("#habit2-core", { attr: { r: 90 } }, { attr: { r: 115 }, duration: 0.6, ease: "back.out(3)" }, 0.2);
+    window.__timelines["habit2"] = tl;
+  </script>
+</template>

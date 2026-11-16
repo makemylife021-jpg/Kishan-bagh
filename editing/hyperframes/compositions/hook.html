@@ -1,0 +1,33 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: var(--ground, #FFF3DF); overflow: hidden; }
+    #hook-sun { position: absolute; left: 540px; top: 1080px; width: 560px; height: 560px; margin: -280px 0 0 -280px;
+      border-radius: 50%; background: radial-gradient(circle at 50% 45%, #FFD166 0%, var(--sun, #FFB627) 55%, #FF8A3D 100%); }
+    #hook-hill { position: absolute; left: -100px; right: -100px; top: 1150px; height: 1000px; border-radius: 50% 50% 0 0;
+      background: #2E7D5B; }
+    #hook-text { position: absolute; left: 100px; right: 160px; top: 300px; text-align: center; color: var(--ink, #1A1423); }
+    #hook-kicker { font: 700 44px/1 Inter, sans-serif; letter-spacing: 0.16em; color: #B8360A; }
+    #hook-title { margin-top: 28px; font: 400 112px/0.98 "Archivo Black", sans-serif; letter-spacing: -0.02em; }
+    #hook-sub { position: absolute; left: 100px; right: 160px; top: 1215px; text-align: center;
+      font: 700 60px/1.15 Inter, sans-serif; color: #FFF3DF; }
+  </style>
+  <div id="root" data-composition-id="hook" data-width="1080" data-height="1920">
+    <div id="hook-sun"></div>
+    <div id="hook-hill" data-layout-allow-overflow></div>
+    <div id="hook-text">
+      <div id="hook-kicker">3 MORNING HABITS</div>
+      <div id="hook-title"><div id="hook-l1">THAT CHANGE</div><div id="hook-l2">YOUR DAY</div></div>
+    </div>
+    <div id="hook-sub">Start tomorrow. ☀</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // Frame 0 already shows the hook; it settles rather than appears.
+    tl.fromTo("#hook-title", { scale: 1.06 }, { scale: 1, duration: 0.6, ease: "power3.out" }, 0);
+    tl.fromTo("#hook-sun", { y: 300 }, { y: 0, duration: 1.4, ease: "power2.out" }, 0);
+    tl.fromTo("#hook-sun", { scale: 0.9 }, { scale: 1.04, duration: 2.9, ease: "none" }, 0);
+    tl.fromTo("#hook-sub", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45, ease: "back.out(2)" }, 0.6);
+    tl.fromTo("#hook-l2", { color: "#1A1423" }, { color: "#B8360A", duration: 0.2 }, 1.1);
+    window.__timelines["hook"] = tl;
+  </script>
+</template>

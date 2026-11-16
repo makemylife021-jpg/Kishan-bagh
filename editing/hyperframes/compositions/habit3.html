@@ -1,0 +1,35 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: #FFD3C2; overflow: hidden; color: var(--ink, #1A1423); }
+    #habit3-num { position: absolute; left: 0; right: 0; top: 300px; text-align: center;
+      font: 400 260px/1 "Archivo Black", sans-serif; color: #B8360A; }
+    #habit3-art { position: absolute; left: 330px; top: 610px; width: 400px; height: 336px; }
+    #habit3-head { position: absolute; left: 110px; right: 170px; top: 990px; text-align: center;
+      font: 400 80px/1.05 "Archivo Black", sans-serif; letter-spacing: -0.01em; }
+    #habit3-detail { position: absolute; left: 110px; right: 170px; top: 1180px; text-align: center;
+      font: 700 42px/1.2 Inter, sans-serif; opacity: 0.75; }
+    
+  </style>
+  <div id="root" data-composition-id="habit3" data-width="1080" data-height="1920">
+    <div id="habit3-num">3</div>
+    <svg data-layout-allow-overflow id="habit3-art" viewBox="0 0 500 420">
+      <rect x="110" y="20" width="280" height="380" rx="24" fill="#FFFFFF" stroke="#1A1423" stroke-width="14"/>
+      <line x1="160" y1="110" x2="340" y2="110" stroke="#1A1423" stroke-opacity="0.25" stroke-width="12" stroke-linecap="round"/>
+      <line x1="160" y1="170" x2="300" y2="170" stroke="#1A1423" stroke-opacity="0.25" stroke-width="12" stroke-linecap="round"/>
+      <path id="habit3-check" d="M170 280 L230 335 L340 220" fill="none" stroke="#2E7D5B" stroke-width="26"
+        stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="260" stroke-dashoffset="260"/></svg>
+    <div id="habit3-head"><div id="habit3-h1">WRITE YOUR</div><div id="habit3-h2">ONE BIG TASK</div></div>
+    <div id="habit3-detail">The one that matters most.</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#habit3-num", { scale: 0.4, opacity: 0, rotation: -12 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.5, ease: "back.out(2.2)" }, 0);
+    tl.fromTo("#habit3-art", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+    tl.fromTo("#habit3-h1", { x: -140, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.2);
+    tl.fromTo("#habit3-h2", { x: 140, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.3);
+    tl.fromTo("#habit3-detail", { y: 30, opacity: 0 }, { y: 0, opacity: 0.75, duration: 0.3, ease: "power2.out" }, 0.45);
+    tl.fromTo("#habit3-check", { attr: { "stroke-dashoffset": 260 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.6, ease: "power2.inOut" }, 1.0);
+    tl.fromTo("#habit3-art", { scale: 1 }, { scale: 1.06, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1, transformOrigin: "50% 50%" }, 1.55);
+    window.__timelines["habit3"] = tl;
+  </script>
+</template>

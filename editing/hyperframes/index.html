@@ -1,15 +1,24 @@
 <!doctype html>
-<html lang="en" data-resolution="portrait">
+<html
+  lang="en"
+  data-resolution="portrait"
+  data-composition-variables='[
+    {"id":"ground","type":"color","label":"Background","default":"#FFF3DF"},
+    {"id":"ink","type":"color","label":"Text","default":"#1A1423"},
+    {"id":"accent","type":"color","label":"Accent","default":"#FF5A1F"},
+    {"id":"sun","type":"color","label":"Sun","default":"#FFB627"}
+  ]'
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <script src="assets/gsap.min.js"></script>
     <style>
-      /* Placeholders: replace all three with the film's own palette and display face. */
       :root {
-        --ground: #000;
-        --ink: #ffffff;
-        --font-display: sans-serif;
+        --ground: #fff3df;
+        --ink: #1a1423;
+        --accent: #ff5a1f;
+        --sun: #ffb627;
       }
       * {
         margin: 0;
@@ -18,25 +27,16 @@
       }
       html,
       body {
-        margin: 0;
         width: 1080px;
         height: 1920px;
         overflow: hidden;
         background: var(--ground);
       }
       #root {
+        position: relative;
         width: 100%;
         height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--font-display);
-      }
-      #title {
-        color: var(--ink);
-        font-size: 72px;
-        font-weight: 600;
-        letter-spacing: -0.03em;
+        background: var(--ground);
       }
     </style>
   </head>
@@ -45,17 +45,39 @@
       id="root"
       data-composition-id="main"
       data-start="0"
-      data-duration="10"
+      data-duration="15"
       data-width="1080"
       data-height="1920"
     >
-      <h1 id="title" class="clip" data-start="0" data-duration="10" data-track-index="0">Title</h1>
+      <!-- Scenes: back to back on one lane -->
+      <div id="hook" data-composition-id="hook" data-composition-src="compositions/hook.html"
+        data-start="0" data-duration="3" data-track-index="0" data-track-kind="graphics"
+        data-width="1080" data-height="1920"></div>
+      <div id="habit1" data-composition-id="habit1" data-composition-src="compositions/habit1.html"
+        data-start="3" data-duration="3" data-track-index="0" data-track-kind="graphics"
+        data-width="1080" data-height="1920"></div>
+      <div id="habit2" data-composition-id="habit2" data-composition-src="compositions/habit2.html"
+        data-start="6" data-duration="3" data-track-index="0" data-track-kind="graphics"
+        data-width="1080" data-height="1920"></div>
+      <div id="habit3" data-composition-id="habit3" data-composition-src="compositions/habit3.html"
+        data-start="9" data-duration="3" data-track-index="0" data-track-kind="graphics"
+        data-width="1080" data-height="1920"></div>
+      <div id="outro" data-composition-id="outro" data-composition-src="compositions/outro.html"
+        data-start="12" data-duration="3" data-track-index="0" data-track-kind="graphics"
+        data-width="1080" data-height="1920"></div>
+
+      <!-- Music: "Lucky Acoustic" by Jesse Keller, CC BY 3.0 (see assets/CREDITS.md) -->
+      <audio id="music" src="assets/music.mp3" data-start="0" data-duration="15"
+        data-track-index="1" data-volume="0.7" data-fade-in="0.2" data-fade-out="1.2"></audio>
+
+      <!-- Whoosh on each cut (peak lands on the cut) -->
+      <audio id="whoosh-1" src="assets/whoosh.wav" data-start="2.65" data-duration="0.6" data-track-index="2" data-volume="0.55"></audio>
+      <audio id="whoosh-2" src="assets/whoosh.wav" data-start="5.65" data-duration="0.6" data-track-index="2" data-volume="0.55"></audio>
+      <audio id="whoosh-3" src="assets/whoosh.wav" data-start="8.65" data-duration="0.6" data-track-index="2" data-volume="0.55"></audio>
+      <audio id="whoosh-4" src="assets/whoosh.wav" data-start="11.65" data-duration="0.6" data-track-index="2" data-volume="0.55"></audio>
     </div>
     <script>
-      const tl = gsap.timeline({ paused: true });
-      // Example: tl.fromTo("#title", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 0);
-      window.__timelines["main"] = tl;
-      tl.seek(0);
+      window.__timelines["main"] = gsap.timeline({ paused: true });
     </script>
   </body>
 </html>
